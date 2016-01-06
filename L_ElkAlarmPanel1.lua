@@ -1,5 +1,5 @@
 -- Plugin Version
-local VERSION = "2.39"
+local VERSION = "2.40"
 
 -- Flags
 local DEBUG_MODE = true
@@ -1291,21 +1291,18 @@ local function plcChangeUpdate(data)
   local houseCode = data:sub(1, 1)
   local unitCode = tonumber(data:sub(2, 3))
   local ll = data:sub(4, 5)
-  local statusCode
+  local status
   if(unitCode == 0) then
-    statusCode = PLC_MODES[ll]
+    status = PLC_MODES[ll]
   else
-    statusCode = tonumber(ll,10)
-    if statusCode == 0 then
-      statusCode = "Off 0%"
-    elseif statusCode == 1 then
-      statusCode = "On 100%"
-    else
-      statusCode = "On " .. status .. "%"
-    end
+    local houseCodeTable = {A=0,B=1,C=2,D=3,E=4,F=5,G=6,H=7,I=8,J=9,K=10,L=11,M=12,N=13,O=14,P=15}
+    status = tonumber(ll,10)
+    local deviceNo = tonumber((string.format('%X',houseCodeTable[houseCode]) .. string.format('%X',unitCode-1))+1,16)
+    luup.variable_set(SWP_SID, "Status", statusCode, g_lights[deviceNo].devId)
   end
+  
   unitCode = (unitCode == 0) and "All Units " or ("Unit " .. unitCode .. " ")
-  debug("plcChangeUpdate: House Code ".. houseCode ..", ".. unitCode .. "set too " .. statusCode)
+  debug("plcChangeUpdate: House Code ".. houseCode ..", ".. unitCode .. "set too " .. status)
 end
 
 local function plcStatus(data)
@@ -2902,9 +2899,9 @@ local function createLights()
       local index = (tonumber(data:sub(6)) == 0) and 0 or tonumber(data:sub(3,5))
     
       if index == 0 then
-        --debug("createLights: Completed.")
-        --return true
-      --else
+        debug("createLights: Completed.")
+        return true
+      else
         g_lights[index] = {}
         debug("createLights: Creating light at index ".. index ..".")
         local label = (data:sub(6) or "")
@@ -3504,3 +3501,4 @@ function elkStartup (lul_device)
   return true, "Startup successful.", "Elk Alarm Panel"
 
 end
+
