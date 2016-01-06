@@ -1,5 +1,5 @@
 -- Plugin Version
-local VERSION = "2.36"
+local VERSION = "2.39"
 
 -- Flags
 local DEBUG_MODE = true
@@ -313,6 +313,10 @@ function table.contains (t, item)
   end
 
   return false
+end
+
+function trim(s) 
+    return (s:gsub("^%s*(.-)%s*$", "%1")) 
 end
 
 local function padLeft (s, length, char)
@@ -1709,14 +1713,15 @@ end
 
 local function readResponse (expectedMsgType, functionName, errorMsg)
 
-  local msgType, data = checkMessage(luup.io.read())
+  local msgType, rx = checkMessage(luup.io.read())
+  
   if (not msgType) then
     log(functionName..": ERROR: "..errorMsg)
     g_errorMessage = errorMsg
     return false
   end
 
-  local status, data = processMessage(data, msgType)
+  local status, data = processMessage(rx, msgType)
 
   if (msgType == expectedMsgType) then -- We received the expected message.
     debug("readResponse: Got expected message '"..msgType.."'.")
@@ -2166,7 +2171,7 @@ end
 function toggleOutput(device, newTargetValue)
   local outputNo = luup.devices[device].id:match("^elk_output_(%d+)")
   if (outputNo == nil) then
-    log("setTarget: ERROR: Invalid control output. The altid of device ".. device .." is '".. luup.devices[device].id .."'.")
+    debug("toggleOutput: ERROR: Invalid control output. The altid of device ".. device .." is '".. luup.devices[device].id .."'.")
     task("Error sending command.", TASK_ERROR)
     return
   end
@@ -2179,35 +2184,40 @@ end
 
 
 function setTarget (device, newTargetValue)
-  local outputTaskNo = luup.devices[device].id:match("^elk_output_(%d+)") or luup.devices[device].id:match("^elk_task_(%d+)")
-  if (outputTaskNo == nil) then
-    log("setTarget: ERROR: Invalid control output/task number. The altid of device ".. device .." is '".. luup.devices[device].id .."'.")
-    task("Error sending command.", TASK_ERROR)
-    return
+  local deviceId, deviceNo = luup.devices[device].id:match("^(elk_%a+_)(%d+)")
+  local command, status
+  local activeSeconds = ""
+
+  if (deviceId == nil or deviceNo == nil) then
+    debug("setTarget: ERROR: Invalid control output/task number/plc unit. The altid of device ".. device .." is '".. luup.devices[device].id .."'.")
+    return false
   end
 
-  newArmedValue = (newTargetValue == "1") and "on" or "off"
-  debug("setTarget: Turn ".. newArmedValue .." control output/task ".. outputTaskNo .." (device ".. device ..").")
-  local ok
-  local command=(luup.devices[device].id:match("^elk_output_")) and "cn" or "tn"
+  debug("setTarget: Turn ".. ((newTargetValue == "1") and "on" or "off") .." control output/task/plc ".. deviceNo .." (device ".. device ..").")
 
-  if (newArmedValue == "on") then
-    local activeSeconds = (luup.variable_get(SWP_SID,"timeOutputActive",device) or "0")
-    activeSeconds = (luup.devices[device].id:match("^elk_output_")) and padLeft(activeSeconds,5) or ""
-    ok = sendCommand(command, padLeft(outputTaskNo, 3) .. activeSeconds) -- Send command to turn on the output control.
+  if deviceId == 'elk_output_' then
+    command = (newTargetValue == "1") and "cn" or "cf"
+    data = padLeft(deviceNo, 3) .. ((newTargetValue == "1") and padLeft((luup.variable_get(SWP_SID,"timeOutputActive",device) or "0"),5)  or "")
+  elseif deviceId == 'elk_task_' then
+  	command = "tn"
+    data = padLeft(deviceNo, 3)
+  elseif deviceId == 'elk_plc_' then
+    local houseCodeTable = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'}
+    hexString = string.format("%02X",deviceNo-1)
+    houseCode = houseCodeTable[(tonumber(hexString:sub(1,1),16)+1)]
+    unitCode = string.format("%02i",(tonumber(hexString:sub(2,2),16)+1))
+    command = (newTargetValue == "1") and "pn" or "pf"
+    data = houseCode ..unitCode
   else
-
-    if (luup.devices[device].id:match("^elk_output_")) then
-    command="cf"
-    ok = sendCommand(command, padLeft(outputTaskNo, 3)) -- Send command to turn off the output control.
-  else
-    log("setTarget: ERROR: Invalid, you cannot stop a task. The altid of device ".. device .." is '".. luup.devices[device].id .."'.")
-    end
+    debug("setTarget: ERROR: Invalid device ID. The altid of device ".. device .." is '".. luup.devices[device].id .."'.")
+    return false
   end
 
-  if (not ok) then
-    task("Error sending command.", TASK_ERROR)
+  status = sendCommand(command, data)
+  if (not status) then
+    debug("setTarget: ERROR: Could not send command.")
   end
+
 end
 
 local function speak(device, MessageType, message)
@@ -2362,8 +2372,8 @@ function display(lul_device, lul_settings)
    
   --L1 16 ASCII characters for first line
   --L2 16 ASCII characters for second line, alternately scrolled with first line
-  local L1 = lul_settings.L1 or ""
-  local L2 = lul_settings.L2 or ""
+  local L1 = trim(lul_settings.L1 or "")
+  local L2 = trim(lul_settings.L2 or "")
   L1 = (#L1 < 16) and padRight((L1 .. "^"), 16) or L1:sub(1,16)
   L2 = (#L2 < 16) and padRight((L2 .. "^"), 16) or L2:sub(1,16)
   sendCommand('dm', KeypadArea .. Clear .. Beep .. DisplayTime .. L1 .. L2)
@@ -2421,8 +2431,8 @@ end
 
 
 local function uiVersionCheck()
-	local ui7Check = luup.variable_get(ELK_SID, "UI7Check", elk_device) or ""
-	debug("uiVersionCheck:Version:" .. ui7Check ..".")
+  local ui7Check = luup.variable_get(ELK_SID, "UI7Check", elk_device) or ""
+  debug("uiVersionCheck:Version:" .. ui7Check ..".")
 	
 	if ui7Check == "" then
 		luup.variable_set(ELK_SID, "UI7Check", "false", elk_device)
@@ -2892,14 +2902,14 @@ local function createLights()
       local index = (tonumber(data:sub(6)) == 0) and 0 or tonumber(data:sub(3,5))
     
       if index == 0 then
-        debug("createLights: Completed.")
-        return true
-      else
+        --debug("createLights: Completed.")
+        --return true
+      --else
         g_lights[index] = {}
         debug("createLights: Creating light at index ".. index ..".")
         local label = (data:sub(6) or "")
         debug(string.format("createLights: Adding name %s to light at %03i.",label,index))
-        g_customs[index].label = label
+        g_lights[index].label = label
       end
       
     end
@@ -2970,7 +2980,7 @@ end
 local function appendLights (rootPtr)
   for k, v in pairs(g_lights) do
     debug("appendLights: Appending light "..k..".")
-    luup.chdev.append(elk_device, rootPtr, "plc_light_".. k, "PLC ".. k ..": "..(v.label or ""), DEVICETYPE_LIGHT, DEVICEFILE_LIGHT, "", false, false)
+    luup.chdev.append(elk_device, rootPtr, "elk_plc_".. k, "PLC ".. k ..": "..(v.label or ""), DEVICETYPE_LIGHT, DEVICEFILE_LIGHT, "", false, false)
   end
 end
 
@@ -2985,7 +2995,8 @@ local function addLuupDevice()
       local taskNo = attr.id:match("^elk_task_(%d+)")
       local sensorNo = attr.id:match("elk_temp_(%d+)") or attr.id:match("elk_keypad_sensor_(%d+)")
       local thermostatNo = attr.id:match("elk_tstat_(%d+)")
-      local plcNo = attr.id:match("plc_light_(%d+)")
+      local plcNo = attr.id:match("elk_plc_(%d+)")
+
       if (zoneNo ~= nil) then
         zoneNo = tonumber(zoneNo, 10)
         debug("addLuupDevice: adding device id "..dev.." to zone "..zoneNo ..".")
@@ -3029,7 +3040,16 @@ local function addLuupDevice()
         if (g_thermostats[thermostatNo] ~= nil) then
           g_thermostats[thermostatNo].devId = dev
         end
+
+      elseif(plcNo ~= nil) then
+        plcNo = tonumber(plcNo, 10)
+        debug("addLuupDevice: adding device id "..dev.." to PLC Unit "..plcNo..".")
+        g_lights[plcNo].devId = dev
+
       end
+
+
+
     end
   end
 end
@@ -3468,8 +3488,6 @@ function elkStartup (lul_device)
   POLL_MIN_DELAY = tonumber(luup.variable_get(HADEVICE_SID, "PollMinDelay", 1),  10)
   POLL_FREQUENCY = tonumber(luup.variable_get(HADEVICE_SID, "PollFrequency", 1), 10)
 
-
-
   HEARTBEAT = os.time()
 
   luup.call_delay("getTroubleReport", 5, "")
@@ -3480,7 +3498,6 @@ function elkStartup (lul_device)
   luup.register_handler("callbackHandler", "ElkCounters")
   luup.register_handler("callbackHandler", "ElkCustom")
 
-  tablePrint(g_counters)
   luup.set_failure(false, lul_device)
   debug("Elk Plugin Startup SUCCESS: Startup successful.")
 
