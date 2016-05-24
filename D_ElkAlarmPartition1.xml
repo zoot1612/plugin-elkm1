@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<root xmlns="urn:schemas-upnp-org:device-1-0">
+  <specVersion>
+    <major>1</major>
+    <minor>0</minor>
+  </specVersion>
+  <device>
+    <deviceType>urn:schemas-micasaverde-com:device:ElkAlarmPartition:1</deviceType>
+    <staticJson>D_ElkAlarmPartition1.json</staticJson>
+    <friendlyName>Elk Alarm Partition</friendlyName>
+    <serviceList>
+      <service>
+        <serviceType>urn:schemas-micasaverde-com:service:AlarmPartition:2</serviceType>
+        <serviceId>urn:micasaverde-com:serviceId:AlarmPartition2</serviceId>
+        <SCPDURL>S_AlarmPartition2.xml</SCPDURL>
+      </service>
+    </serviceList>
+	<Category_Num>23</Category_Num>
+  </device>
+</root>
