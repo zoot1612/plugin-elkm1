@@ -1,5 +1,5 @@
 -- Plugin Version
-local VERSION = "2.40"
+local VERSION = "2.41"
 
 -- Flags
 local DEBUG_MODE = true
@@ -436,7 +436,7 @@ local function processArmingStatusReport (data)
     g_partitions[i].alarmState = A[i]
 
     if (A[i] >= '3') then -- We have an alarm.
-      local message = string.format("ALARM: %s, %s", ALARM_STATES[A[i]], g_partitions[i].label)
+      local message = string.format("ALARM: %s, %s", ALARM_STATES[A[i]], g_partitions[i].label or "")
       log(message)
       task(message, TASK_ERROR_PERM)
 
@@ -3501,4 +3501,5 @@ function elkStartup (lul_device)
   return true, "Startup successful.", "Elk Alarm Panel"
 
 end
+
 
