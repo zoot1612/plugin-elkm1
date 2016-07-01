@@ -1,0 +1,274 @@
+<?xml version="1.0"?>
+<scpd xmlns="urn:schemas-upnp-org:service-1-0">
+	<specVersion>
+		<major>1</major>
+		<minor>0</minor>
+	</specVersion>
+	<serviceStateTable>
+	
+		<stateVariable sendEvents="no">
+			<name>DebugMode</name>
+			<datatype>boolean</datatype>
+			<setDefaultValue>1</setDefaultValue>
+			<defaultValue>0</defaultValue>
+		</stateVariable>
+
+		<stateVariable sendEvents="no">
+			<name>PluginVersion</name>
+			<datatype>string</datatype>
+		</stateVariable>
+    
+		<stateVariable sendEvents="no">
+			<name>A_ARG_TYPE_KeypadArea</name>
+			<datatype>ui4</datatype>
+			<setDefaultValue>1</setDefaultValue>
+			<defaultValue>0</defaultValue>
+		</stateVariable>
+
+
+		<stateVariable sendEvents="no">
+			<name>A_ARG_TYPE_Clear</name>
+			<datatype>ui4</datatype>
+			<setDefaultValue>1</setDefaultValue>
+			<defaultValue>0</defaultValue>
+		</stateVariable>
+
+
+		<stateVariable sendEvents="no">
+			<name>A_ARG_TYPE_Beep</name>
+			<datatype>ui4</datatype>
+			<setDefaultValue>1</setDefaultValue>
+			<defaultValue>0</defaultValue>
+		</stateVariable>
+
+
+		<stateVariable sendEvents="no">
+			<name>A_ARG_TYPE_DisplayTime</name>
+			<datatype>ui4</datatype>
+			<setDefaultValue>1</setDefaultValue>
+			<defaultValue>0</defaultValue>
+		</stateVariable>
+
+		<stateVariable sendEvents="no">
+			<name>A_ARG_TYPE_L1</name>
+			<datatype>string</datatype>
+			<setDefaultValue>1</setDefaultValue>
+			<defaultValue>0</defaultValue>
+		</stateVariable>
+
+		<stateVariable sendEvents="no">
+			<name>A_ARG_TYPE_L2</name>
+			<datatype>string</datatype>
+			<setDefaultValue>1</setDefaultValue>
+			<defaultValue>0</defaultValue>
+		</stateVariable>
+		
+		<stateVariable sendEvents="no">
+			<name>FirmwareVersion</name>
+			<datatype>string</datatype>
+		</stateVariable>
+		
+		<stateVariable sendEvents="no">
+			<name>PinCode</name>
+			<datatype>ui4</datatype>
+		</stateVariable>
+		
+		<stateVariable sendEvents="yes">
+			<name>Heartbeat</name>
+			<datatype>ui4</datatype>
+		</stateVariable>
+
+		<stateVariable sendEvents="yes">
+			<name>FunctionKeyNo</name>
+			<datatype>string</datatype>
+		</stateVariable>
+		
+		<stateVariable sendEvents="no">
+			<name>ElkRTC</name>
+			<datatype>string</datatype>
+		</stateVariable>
+
+		<stateVariable sendEvents="no">
+			<name>ElkCounter</name>
+			<datatype>string</datatype>
+		</stateVariable>
+		
+		<stateVariable sendEvents="no">
+			<name>ElkCounterValue</name>
+			<datatype>string</datatype>
+		</stateVariable>
+
+		<stateVariable sendEvents="no">
+			<name>ElkCustom</name>
+			<datatype>string</datatype>
+		</stateVariable>
+		
+		<stateVariable sendEvents="no">
+			<name>ElkCustomValue</name>
+			<datatype>string</datatype>
+		</stateVariable>
+
+		<stateVariable sendEvents="no">
+			<name>ElkString</name>
+			<datatype>string</datatype>
+		</stateVariable>
+
+	</serviceStateTable>
+	<actionList>
+	
+		<action>
+			<name>ClearPinCode</name>
+			<argumentList></argumentList>
+		</action>
+		
+		<action>
+			<name>ClearTask</name>
+			<argumentList></argumentList>
+		</action>
+
+		<action>
+			<name>GetEventJob</name>
+			<argumentList></argumentList>
+		</action>
+
+		<action>
+			<name>GetTroubleReport</name>
+			<argumentList>
+			<argument>
+				<name>TroubleReport</name>
+				<direction>out</direction>
+				<relatedStateVariable>TroubleReport</relatedStateVariable>
+			</argument>
+			</argumentList>
+		</action>
+		
+		<action>
+			<name>GetHeartbeat</name>
+			<argumentList>
+			<argument>
+				<name>HeartbeatValue</name>
+				<direction>out</direction>
+				<relatedStateVariable>Heartbeat</relatedStateVariable>
+			</argument>
+			</argumentList>
+		</action>
+
+		<action>
+			<name>FunctionKey</name>
+			<argumentList>
+			<argument>
+				<name>functionkey</name>
+				<direction>in</direction>
+				<relatedStateVariable>FunctionKeyNo</relatedStateVariable>
+			</argument>
+			</argumentList>
+		</action>
+
+		<action>
+			<name>StorePinCode</name>
+			<argumentList>
+			<argument>
+				<name>PinCodeValue</name>
+				<direction>in</direction>
+				<relatedStateVariable>PinCode</relatedStateVariable>
+			</argument>
+			</argumentList>
+		</action>
+		
+		<action>
+			<name>SetElkRTC</name>
+			<argumentList>
+			<argument>
+				<name>ElkRTCValue</name>
+				<direction>in</direction>
+				<relatedStateVariable>ElkRTC</relatedStateVariable>
+			</argument>
+			</argumentList>
+		</action>
+		
+		<action>
+			<name>SetCounter</name>
+			<argumentList>
+			<argument>
+				<name>Counter</name>
+				<direction>in</direction>
+				<relatedStateVariable>ElkCounter</relatedStateVariable>
+			</argument>
+			<argument>
+				<name>Value</name>
+				<direction>in</direction>
+				<relatedStateVariable>ElkCounterValue</relatedStateVariable>
+			</argument>
+			</argumentList>
+		</action>
+
+		<action>
+			<name>SetCustom</name>
+			<argumentList>
+			<argument>
+				<name>Custom</name>
+				<direction>in</direction>
+				<relatedStateVariable>ElkCustom</relatedStateVariable>
+			</argument>
+			<argument>
+				<name>Value</name>
+				<direction>in</direction>
+				<relatedStateVariable>ElkCustomValue</relatedStateVariable>
+			</argument>
+			</argumentList>
+		</action>
+		
+		<action>
+			<name>Speak</name>
+			<argumentList>
+			<argument>
+				<name>Type</name>
+				<direction>in</direction>
+				<relatedStateVariable>MessageType</relatedStateVariable>
+			</argument>
+			<argument>
+				<name>Message</name>
+				<direction>in</direction>
+				<relatedStateVariable>MessageValue</relatedStateVariable>
+			</argument>
+			</argumentList>
+		</action>
+
+		<action>
+			<name>Display</name>
+			<argumentList>
+			<argument>
+        <name>KeypadArea</name>
+        <direction>in</direction>
+				<relatedStateVariable>A_ARG_TYPE_KeypadArea</relatedStateVariable>
+			</argument>
+			<argument>
+        <name>Clear</name>
+        <direction>in</direction>
+				<relatedStateVariable>A_ARG_TYPE_Clear</relatedStateVariable>
+			</argument>
+			<argument>
+        <name>Beep</name>
+        <direction>in</direction>
+				<relatedStateVariable>A_ARG_TYPE_Beep</relatedStateVariable>
+			</argument>
+			<argument>
+        <name>DisplayTime</name>
+        <direction>in</direction>
+				<relatedStateVariable>A_ARG_TYPE_DisplayTime</relatedStateVariable>
+			</argument>
+			<argument>
+        <name>L1</name>
+        <direction>in</direction>
+				<relatedStateVariable>A_ARG_TYPE_L1</relatedStateVariable>
+			</argument>
+			<argument>
+        <name>L2</name>
+        <direction>in</direction>
+				<relatedStateVariable>A_ARG_TYPE_L2</relatedStateVariable>
+			</argument>
+			</argumentList>
+		</action>
+	
+	</actionList>
+</scpd>

@@ -1,0 +1,190 @@
+<?xml version="1.0"?>
+<implementation>
+    <files>L_ElkAlarmPanel1.lua</files>
+	<startup>elkStartup</startup>
+	<incoming>
+		<lua>
+			processMessage (lul_data, nil, lul_job, lul_device)
+		</lua>
+	</incoming>
+	<actionList>
+		<action>
+			<serviceId>urn:micasaverde-com:serviceId:AlarmPartition2</serviceId>
+			<name>RequestArmMode</name>
+			<run>
+				requestArmMode (lul_device, lul_settings.State, lul_settings.PINCode)
+			</run>
+		</action>
+		
+		<action>
+			<serviceId>urn:micasaverde-com:serviceId:AlarmPartition2</serviceId>
+			<name>RequestQuickArmMode</name>
+			<run>
+				requestQuickArmMode (lul_device, lul_settings.State)
+			</run>
+		</action>
+
+		<action>
+			<serviceId>urn:micasaverde-com:serviceId:ElkAlarmPanel1</serviceId>
+			<name>StorePinCode</name>
+			<run>
+				storePinCode (lul_device, lul_settings.PinCode)
+			</run>
+		</action>
+		
+		<action>
+			<serviceId>urn:micasaverde-com:serviceId:ElkAlarmPanel1</serviceId>
+			<name>ClearPinCode</name>
+			<run>
+				clearPinCode (lul_device)
+			</run>
+		</action>
+		
+		<action>
+			<serviceId>urn:micasaverde-com:serviceId:ElkAlarmPanel1</serviceId>
+			<name>ClearTask</name>
+			<run>
+				clearTask()
+			</run>
+		</action>
+
+		<action>
+			<serviceId>urn:micasaverde-com:serviceId:ElkAlarmPanel1</serviceId>
+			<name>GetHeartbeat</name>
+			<run>
+				getHeartbeat(lul_device)
+			</run>
+		</action>
+
+		<action>
+			<serviceId>urn:micasaverde-com:serviceId:ElkAlarmPanel1</serviceId>
+			<name>SetElkRTC</name>
+			<run>
+				setElkRTC(lul_device,lul_settings.Time)
+			</run>
+		</action>
+		
+		<action>
+			<serviceId>urn:micasaverde-com:serviceId:ElkAlarmPanel1</serviceId>
+			<name>SetCounter</name>
+			<run>
+				setCounter(lul_device,lul_settings.Counter,lul_settings.Value)
+			</run>
+		</action>
+
+		<action>
+			<serviceId>urn:micasaverde-com:serviceId:ElkAlarmPanel1</serviceId>
+			<name>SetCustom</name>
+			<run>
+				setCustom(lul_device,lul_settings.Custom,lul_settings.Value)
+			</run>
+		</action>
+
+		<action>
+			<serviceId>urn:micasaverde-com:serviceId:ElkAlarmPanel1</serviceId>
+			<name>GetTroubleReport</name>
+			<run>
+				getTroubleReport(lul_device)
+			</run>
+		</action>
+		
+		<action>
+			<serviceId>urn:micasaverde-com:serviceId:ElkAlarmPanel1</serviceId>
+			<name>GetEventJob</name>
+			<job>
+			    getEventJob(lul_device, lul_settings.LogStart, lul_job)
+			</job>
+			<incoming>
+			    return incomingGetLog(lul_device, lul_settings.LogStart, lul_job, lul_data)
+			</incoming>
+		</action>
+		
+		<action>
+			<serviceId>urn:micasaverde-com:serviceId:ElkAlarmPanel1</serviceId>
+			<name>Speak</name>
+			<run>
+				speak(lul_device,lul_settings.MessageType,lul_settings.MessageValue)
+			</run>
+		</action>
+		
+		<action>
+			<serviceId>urn:micasaverde-com:serviceId:SecuritySensor1</serviceId>
+			<name>SetArmed</name>
+			<run>
+				setArmed (lul_device, lul_settings.newArmedValue)
+			</run>
+		</action>
+		
+		<action>
+			<serviceId>urn:upnp-org:serviceId:SwitchPower1</serviceId>
+			<name>SetTarget</name>
+			<run>
+				setTarget(lul_device, lul_settings.newTargetValue)
+			</run>
+		</action>
+		
+		<action>
+			<serviceId>urn:upnp-org:serviceId:HVAC_UserOperatingMode1</serviceId>
+			<name>SetModeTarget</name>
+			<run>
+				setModeTarget(lul_device, lul_settings.NewModeTarget)
+			</run>
+		</action>
+		
+		<action>
+			<serviceId>urn:upnp-org:serviceId:HVAC_FanOperatingMode1</serviceId>
+			<name>SetMode</name>
+			<run>
+				setFanMode(lul_device, lul_settings.NewMode)
+			</run>
+		</action>
+		
+		<action>
+			<serviceId>urn:upnp-org:serviceId:TemperatureSetpoint1_Heat</serviceId>
+			<name>SetCurrentSetpoint</name>
+			<run>
+				setThermostatSetpoint(lul_device, "heat", lul_settings.NewCurrentSetpoint)
+			</run>
+		</action>
+		
+		<action>
+			<serviceId>urn:upnp-org:serviceId:TemperatureSetpoint1_Cool</serviceId>
+			<name>SetCurrentSetpoint</name>
+			<run>
+				setThermostatSetpoint(lul_device, "cool", lul_settings.NewCurrentSetpoint)
+			</run>
+		</action>
+		
+		<action>
+			<serviceId>uurn:micasaverde-com:serviceId:HaDevice1</serviceId>
+			<name>ToggleState</name>
+			<run>
+				toggleOutput(lul_device, lul_settings.newTargetValue)
+			</run>
+		</action>
+
+		<action>
+			<serviceId>urn:micasaverde-com:serviceId:ElkAlarmPanel1</serviceId>
+			<name>Display</name>
+			<run>
+				display(lul_device, lul_settings)
+			</run>
+		</action>
+    
+		<action>
+			<serviceId>urn:micasaverde-com:serviceId:ElkAlarmPanel1</serviceId>
+			<name>FunctionKey</name>
+			<run>
+				functionKey(lul_device, lul_settings)
+			</run>
+		</action>
+	</actionList>
+</implementation>
+
+
+
+
+
+
+
+

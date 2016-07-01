@@ -1,0 +1,159 @@
+{
+	"flashicon": "icons\/devices.swf",
+	"inScene": "0",
+	"DisplayStatus": {},
+	"doc_url": {
+		"doc_forced_url": {
+			"text": "http://code.mios.com/trac/mios_elk-alarm-panel"
+		}
+	},
+	"Tabs": [
+		{
+			"Label": {
+				"lang_tag": "tab_control",
+				"text": "Control"
+			},
+			"Position": "0",
+			"TabType": "flash",
+			"SceneGroup":[
+				{
+					"id": "1",
+					"top": "1",
+					"left": "0",
+					"x": "1",
+					"y": "1"
+				}
+			],
+			"ControlGroup": [
+				{
+					"id": "1",
+					"isSingle": "0",
+					"scenegroup": "1"
+				}
+			],
+			"Control": [
+				{
+					"ControlGroup": "1",
+					"ControlType": "button",
+					"Label": {
+						"lang_tag": "button_clear",
+						"text": "Clear"
+					},
+					"Display": {
+						"Top": 20,
+						"Left": 50,
+						"Width": 60,
+						"Height": 20
+					},
+					"Command": {
+						"Service": "urn:micasaverde-com:serviceId:ElkAlarmPanel1",
+						"Action": "ClearTask",
+						"Parameters": []
+					}
+				}
+			]
+		},
+		{
+			"Label": {
+				"lang_tag": "advanced",
+				"text": "Advanced"
+			},
+			"Position": "1",
+			"TabType": "javascript",
+			"ScriptName": "shared.js",
+			"Function": "advanced_device"
+		},
+		{
+			"Label": {
+				"lang_tag": "trouble",
+				"text": "Trouble"
+			},
+			"Position": "2",
+			"TabType": "javascript",
+			"ScriptName": "J_ElkAlarmPanel1.js",
+			"Function": "troubleTab"
+		},
+		{
+			"Label": {
+				"lang_tag": "log",
+				"text": "Log"
+			},
+			"Position": "3",
+			"TabType": "javascript",
+			"ScriptName": "J_ElkAlarmPanel1.js",
+			"Function": "logTab"
+		},
+		{
+			"Label": {
+				"lang_tag": "time",
+				"text": "Time"
+			},
+			"Position": "4",
+			"TabType": "javascript",
+			"ScriptName": "J_ElkAlarmPanel1.js",
+			"Function": "timeTab"
+		},
+		{
+			"Label": {
+				"lang_tag": "counters",
+				"text": "Counters"
+			},
+			"Position": "5",
+			"TabType": "javascript",
+			"ScriptName": "J_ElkAlarmPanel1.js",
+			"Function": "counterTab"
+		},
+		{
+			"Label": {
+				"lang_tag": "custom",
+				"text": "Custom Settings"
+			},
+			"Position": "6",
+			"TabType": "javascript",
+			"ScriptName": "J_ElkAlarmPanel1.js",
+			"Function": "customTab"
+		},
+		{
+		  "Label": {
+		    "lang_tag": "notifications",
+		    "text": "Notifications"
+		  },
+		"Position": "7",
+		"TabType": "javascript",
+		"ScriptName": "shared.js",
+		"Function": "device_notifications"
+		}
+	],
+    "eventList2": [
+        {
+            "id": 1,
+            "label": {
+                "lang_tag": "heartbeat_goes_above",
+                "text": "Heartbeat goes above"
+            },
+            "serviceId": "urn:micasaverde-com:serviceId:ElkAlarmPanel1",
+            "norepeat": "1",
+            "argumentList": [
+                {
+                    "id": 1,
+                    "dataType": "i4",
+                    "name": "Heartbeat",
+                    "comparisson": ">",
+                    "prefix": {
+                        "lang_tag": "second",
+                        "text": "Second"
+                    },
+                    "suffix": {
+                        "lang_tag": "seconds",
+                        "text": "seconds"
+                    },
+                    "HumanFriendlyText": {
+                        "lang_tag": "heartbeat_seconds_goes_above",
+                        "text": "_DEVICE_NAME_ _ARGUMENT_VALUE_ seconds between heartbeats"
+                    }
+                }
+            ]
+        }
+    ],
+	"DeviceType": "urn:schemas-micasaverde-com:device:ElkAlarmPanel:1"
+}
