@@ -1,31 +1,49 @@
-// Device Service
-var ELK_SID = "urn:micasaverde-com:serviceId:ElkAlarmPanel1";
-var timerRunning = false;
+var Elk = (function(api)
+{
+	// unique identifier for this plugin...
+  var uuid = 'BC1E7E18-4488-4DEE-A133-1A7097F22127';
+  var myModule = {};
+  var device = api.getCpanelDeviceId();
+  var ELK_SID = "urn:micasaverde-com:serviceId:ElkAlarmPanel1";
+  var timerRunning = false;
 
-MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-ipaddress = getDataRequestURL;
+  ipaddress = getDataRequestURL;
+  
+  function onBeforeCpanelClose(args)
+  {
+    // do some cleanup...
+    console.log('handler for before cpanel close');
+  }
 
-function newLayout() {
-  var html = "";
-  html += '<!DOCTYPE html>';
-  html += '<head>';
+  function init()
+	{
+    // register to events...
+    api.registerEventHandler('on_ui_cpanel_before_close', myModule,	'onBeforeCpanelClose');
+  }
 
-  html += '<style type="text/css">';
+  function newLayout()
+  {
+    var html = "";
+    html += '<!DOCTYPE html>';
+    html += '<head>';
 
-  html += 'h1 {';
-  html += 'color: #006f44;';
-  html += 'font-family: \'open_sanslight\';';
-  html += 'font-size: 40px;';
-  html += 'text-align: center;';
-  html += '}';
+    html += '<style type="text/css">';
 
-  html += 'h3 {';
-  html += 'color: #006f44;';
-  html += 'font-family: \'open_sanslight\';';
-  html += 'font-size: 25px;';
-  html += 'text-align: left;';
-  html += '}';
+    html += 'h1 {';
+    html += 'color: #006f44;';
+    html += 'font-family: \'open_sanslight\';';
+    html += 'font-size: 40px;';
+    html += 'text-align: center;';
+    html += '}';
+
+    html += 'h3 {';
+    html += 'color: #006f44;';
+    html += 'font-family: \'open_sanslight\';';
+    html += 'font-size: 25px;';
+    html += 'text-align: left;';
+    html += '}';
 
   html += 'table {';
   html += 'width: 100%;';
@@ -525,3 +543,17 @@ function formatTime(time) {
   }
   return result;
 }
+
+	myModule = {
+		uuid: uuid,
+		init: init,
+		onBeforeCpanelClose: onBeforeCpanelClose,
+		troubleTab: troubleTab,
+		troubleReport: troubleReport,
+		logTab: logTab,
+		timeTab: timeTab,
+		counterTab: counterTab,
+		customTab: customTab
+	};
+	return myModule;
+})(api);
