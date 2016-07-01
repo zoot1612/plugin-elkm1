@@ -85,7 +85,7 @@ var Elk = (function(api)
     html += '</div>';
     html += '</body>';
     html += '</html>';
-    setCpanelContent(html);
+    api.setCpanelContent(html);
     troubleReport(jQuery("#troubleTable"), trouble, device, jQuery("#status"));
   }
 
@@ -136,7 +136,7 @@ var Elk = (function(api)
     html += '</div>';
     html += '</body>';
     html += '</html>';
-    setCpanelContent(html);
+    api.setCpanelContent(html);
     scanLogEvent(jQuery("#logTable"), device, LogStart, jQuery("#status"));
   }
 
@@ -297,7 +297,7 @@ var Elk = (function(api)
     html += '</div>';
     html += '</body>';
     html += '</html>';
-    setCpanelContent(html);
+    api.setCpanelContent(html);
     getElkRTC(device, jQuery("#clockCell"), jQuery("#status"));
   }
 
@@ -404,7 +404,7 @@ var Elk = (function(api)
     html += '</body>';
     html += '</html>';
 
-    setCpanelContent(html);
+    api.setCpanelContent(html);
 
     getCounters(jQuery("#counterTable"), device, jQuery("#status"));
   }
@@ -502,7 +502,7 @@ var Elk = (function(api)
     html += '</div>';
     html += '</body>';
     html += '</html>';
-    setCpanelContent(html);
+    api.setCpanelContent(html);
     getCustomValue(jQuery("#customTable"), device, jQuery("#status"));
   }
 
