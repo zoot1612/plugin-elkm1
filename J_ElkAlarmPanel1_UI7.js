@@ -7,10 +7,6 @@ var Elk = (function(api)
   var ELK_SID = "urn:micasaverde-com:serviceId:ElkAlarmPanel1";
   var timerRunning = false;
 
-  MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-  ipaddress = getDataRequestURL;
-
   function onBeforeCpanelClose(args)
   {
     // do some cleanup...
@@ -62,7 +58,7 @@ var Elk = (function(api)
    **********/
   function troubleTab(device)
   {
-    var troubleReportList = get_device_state(device, ELK_SID, "TroubleReport", 1);
+    var troubleReportList = api.getDeviceState(device, ELK_SID, "TroubleReport", 1);
     var trouble = troubleReportList.split(',');
     var html = newLayout();
     html += '<div class="clearfix">';
@@ -128,7 +124,7 @@ var Elk = (function(api)
     html += '</tbody>';
 
     html += '<tfoot>';
-    html += '<tr><td colspan=4><input id="elk_getForwardLogButton" type="submit" value="More" class="btn1" onclick="tableStatus(jQuery(\'#logTable\'),' + device + ',jQuery(\'#status\'))"></input></td></tr>';
+    html += '<tr><td colspan=4><input id="elk_getForwardLogButton" type="submit" value="More" class="btn1" onclick="Elk.tableStatus(jQuery(\'#logTable\'),' + device + ',jQuery(\'#status\'))"></input></td></tr>';
     html += '<tr><td colspan=4 id="status"></td></tr>';
     html += '</tfoot>';
     html += '</table>';
@@ -286,7 +282,7 @@ var Elk = (function(api)
     html += '<tbody>';
     html += '<tr>';
     html += '<td id="clockCell"></td>';
-    html += '<td><input id="elk_getForwardLogButton" type="submit" value="Set" class="btn1" title="Set Elk Real Time Clock from your device" onclick="setElkRTC(' + device + ',jQuery(\'#clockCell\'),jQuery(\'#status\'))"></input></td>';
+    html += '<td><input id="elk_getForwardLogButton" type="submit" value="Set" class="btn1" title="Set Elk Real Time Clock from your device" onclick="Elk.setElkRTC(' + device + ',jQuery(\'#clockCell\'),jQuery(\'#status\'))"></input></td>';
     html += '</tr>';
     html += '</tbody>';
 
@@ -304,6 +300,7 @@ var Elk = (function(api)
 
   function showtime(time, cell, offset, status)
   {
+    var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     var timeValue = '';
     var now = new Date();
     time = new Date(time);
@@ -432,7 +429,7 @@ var Elk = (function(api)
             row.append('<td>' + Counters[i].index + '</td>');
             row.append('<td>' + Counters[i].label + '</td>');
             row.append('<td><form name ="' + Counters[i].index + '"><input name=counterValue type="text" value=' + Counters[i].value + '></input></td>');
-            row.append('<td><input type="submit" value="Set" class="btn1" onclick="setCounter(' + device + ',' + '\'' + Counters[i].index + '\'' + ',jQuery(\'#counterTable\'))"></input></<form></td>');
+            row.append('<td><input type="submit" value="Set" class="btn1" onclick="Elk.setCounter(' + device + ',' + '\'' + Counters[i].index + '\'' + ',jQuery(\'#counterTable\'))"></input></<form></td>');
           }
           status.html("Completed");
         }
@@ -559,7 +556,7 @@ var Elk = (function(api)
             row.append('<td>' + Custom[i].label + '</td>');
             row.append('<td><label>' + type + ' </label></td>');
             row.append('<td><form name ="' + customIndex + '"><input type="text" value=' + customValue + ' name="' + type + '"></input></td>');
-            row.append('<td><input type="submit" value="Set" class="btn1" onclick="setCustom(' + device + ',' + '\'' + customIndex + '\'' + ',jQuery(\'#customTable\'))"></input></<form></td>');
+            row.append('<td><input type="submit" value="Set" class="btn1" onclick="Elk.setCustom(' + device + ',' + '\'' + customIndex + '\'' + ',jQuery(\'#customTable\'))"></input></<form></td>');
           }
           status.html("Completed");
         }
@@ -634,9 +631,13 @@ var Elk = (function(api)
     troubleTab: troubleTab,
     troubleReport: troubleReport,
     logTab: logTab,
+		tableStatus: tableStatus,
     timeTab: timeTab,
+		setElkRTC: setElkRTC,
     counterTab: counterTab,
-    customTab: customTab
+		setCounter: setCounter,
+    customTab: customTab,
+		setCustom: setCustom
   };
   return myModule;
 })(api);
