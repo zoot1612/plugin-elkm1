@@ -53,7 +53,7 @@
 		},
     {
       "Label":{
-        "lang_tag":"ui7_advanced",
+        "lang_tag":"advanced",
         "text":"Advanced"
       },
       "Position":"1",
@@ -63,57 +63,57 @@
     },
     {
       "Label":{
-        "lang_tag":"ui7_trouble",
+        "lang_tag":"trouble",
         "text":"Trouble"
       },
       "Position":"2",
       "TabType":"javascript",
       "ScriptName":"J_ElkAlarmPanel1_UI7.js",
-      "Function":"troubleTab"
+      "Function":"Elk.troubleTab"
     },
     {
       "Label":{
-        "lang_tag":"ui7_log",
+        "lang_tag":"log",
         "text":"Log"
       },
       "Position":"3",
       "TabType":"javascript",
       "ScriptName":"J_ElkAlarmPanel1_UI7.js",
-      "Function":"logTab"
+      "Function":"Elk.logTab"
     },
     {
       "Label":{
-        "lang_tag":"ui7_time",
+        "lang_tag":"time",
         "text":"Time"
       },
       "Position":"4",
       "TabType":"javascript",
       "ScriptName":"J_ElkAlarmPanel1_UI7.js",
-      "Function":"timeTab"
+      "Function":"Elk.timeTab"
     },
     {
       "Label":{
-        "lang_tag":"ui7_counters",
+        "lang_tag":"counters",
         "text":"Counters"
       },
       "Position":"5",
       "TabType":"javascript",
       "ScriptName":"J_ElkAlarmPanel1_UI7.js",
-      "Function":"counterTab"
+      "Function":"Elk.counterTab"
     },
     {
       "Label":{
-        "lang_tag":"ui7_custom",
+        "lang_tag":"custom",
         "text":"Custom Settings"
       },
       "Position":"6",
       "TabType":"javascript",
       "ScriptName":"J_ElkAlarmPanel1_UI7.js",
-      "Function":"customTab"
+      "Function":"Elk.customTab"
     },
     {
       "Label":{
-        "lang_tag":"ui7_notifications",
+        "lang_tag":"notifications",
         "text":"Notifications"
       },
       "Position":"7",
@@ -126,7 +126,7 @@
     {
       "id":1,
       "label":{
-        "lang_tag":"ui7_heartbeat_goes_above",
+        "lang_tag":"heartbeat_goes_above",
         "text":"Heartbeat goes above"
       },
       "serviceId":"urn:micasaverde-com:serviceId:ElkAlarmPanel1",
@@ -138,15 +138,15 @@
           "name":"Heartbeat",
           "comparisson":">",
           "prefix":{
-            "lang_tag":"ui7_second",
+            "lang_tag":"second",
             "text":"Second"
           },
           "suffix":{
-            "lang_tag":"ui7_seconds",
+            "lang_tag":"seconds",
             "text":"seconds"
           },
           "HumanFriendlyText":{
-            "lang_tag":"ui7_heartbeat_seconds_goes_above",
+            "lang_tag":"heartbeat_seconds_goes_above",
             "text":"_DEVICE_NAME_ _ARGUMENT_VALUE_ seconds between heartbeats"
           }
         }
