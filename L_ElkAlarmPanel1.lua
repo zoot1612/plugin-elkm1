@@ -1,5 +1,5 @@
 -- Plugin Version
-local VERSION = "2.41"
+local VERSION = "2.42"
 
 -- Flags
 local DEBUG_MODE = true
@@ -2832,11 +2832,13 @@ local function createCounters()
 
       data = data:gsub("(%s+)$", "")
       local labelId = data:sub(1, 2)
-      i = tonumber(data:sub(3,5))
-      if i == 0 then
-        debug("createCounters: Completed.")
-        return true
-      end
+      --i = tonumber(data:sub(3,5))
+
+      --if i == 0 then
+        --debug("createCounters: Completed.")
+        --return true
+      --end
+
       debug("createCounters: Creating counter ".. i ..".")
       g_counters[i] = {}
       local label = (data:sub(6) or "")
@@ -2866,13 +2868,13 @@ local function createCustomValues()
 
       data = data:gsub("(%s+)$", "")
       local labelId = data:sub(1, 2)
-      local index = (tonumber(data:sub(6)) == 0) and 0 or tonumber(data:sub(3,5))
-
+      --local index = (tonumber(data:sub(6)) == 0) and 0 or tonumber(data:sub(3,5))
+      local index = tonumber(data:sub(3,5))
+      debug("createCustomValues: Creating custom  at index ".. i ..".")
+      g_customs[i] = {}
+      local label = (data:sub(6) or "")
       if index ~= 0 then
-        debug("createCustomValues: Creating custom  at index ".. index ..".")
-        g_customs[index] = {}
-        local label = (data:sub(6) or "")
-        debug(string.format("createCustomValues: Adding name %s to custom at %03i.",label,index))
+				debug(string.format("createCustomValues: Adding name %s to custom at %03i.",label,index))
         g_customs[index].label = label
       end
     end
