@@ -424,8 +424,8 @@ var Elk = (function(api)
         status.html("Response received");
         var Counters = response.responseText.evalJSON();
         if (Counters.length > 0)
-				$("#counterTable").empty();
         {
+          $("#counterTable").empty();
           for (var i = 0; i < Counters.length; i++)
           {
             row = jQuery("<tr>").appendTo(table);
@@ -521,6 +521,7 @@ var Elk = (function(api)
         var Custom = response.responseText.evalJSON();
         if (Custom.length > 0)
         {
+          $("#customTable").empty();
           for (var i = 0; i < Custom.length; i++)
           {
             var customIndex = Custom[i].index;
@@ -601,6 +602,7 @@ var Elk = (function(api)
       onSuccess: function(response)
       {
         var custom = response.responseText.evalJSON();
+        //getCustomValue(table, device, status)
       },
       onFailure: function() {}
     });
