@@ -6,7 +6,8 @@ var Elk = (function(api)
   var device = api.getCpanelDeviceId();
   var ELK_SID = "urn:micasaverde-com:serviceId:ElkAlarmPanel1";
   var timerRunning = false;
-
+  var requestURL = api.getCommandURL();
+  
   function onBeforeCpanelClose(args)
   {
     // do some cleanup...
@@ -140,7 +141,7 @@ var Elk = (function(api)
   {
     var row = jQuery("<tr>").appendTo(table);
     status.html("Creating job to retrieve log");
-    new Ajax.Request("../port_3480/data_request",
+    new Ajax.Request(requestURL + "/data_request",
     {
       method: "get",
       parameters:
@@ -175,7 +176,7 @@ var Elk = (function(api)
   function waitForScanLogEventJob(jobId, table, row, device, status)
   {
     status.html("Waiting for job status");
-    new Ajax.Request("../port_3480/data_request",
+    new Ajax.Request(requestURL + "/data_request",
     {
       method: "get",
       parameters:
@@ -217,7 +218,7 @@ var Elk = (function(api)
   function getScanLogEventResult(table, row, device, status)
   {
     status.html("Getting response");
-    new Ajax.Request("../port_3480/data_request",
+    new Ajax.Request(requestURL + "/data_request",
     {
       method: "get",
       parameters:
@@ -325,7 +326,7 @@ var Elk = (function(api)
 
   function getElkRTC(device, cell, status)
   {
-    new Ajax.Request("../port_3480/data_request",
+    new Ajax.Request(requestURL + "/data_request",
     {
       method: "get",
       parameters:
@@ -351,7 +352,7 @@ var Elk = (function(api)
   function setElkRTC(device, cell, status)
   {
     var time = +new Date;
-    new Ajax.Request("../port_3480/data_request",
+    new Ajax.Request(requestURL + "/data_request",
     {
       method: "get",
       parameters:
@@ -408,7 +409,7 @@ var Elk = (function(api)
 
   function getCounters(table, device, status)
   {
-    new Ajax.Request("../port_3480/data_request",
+    new Ajax.Request(requestURL + "/data_request",
     {
       method: "get",
       parameters:
@@ -419,9 +420,11 @@ var Elk = (function(api)
       },
       onSuccess: function(response)
       {
+				
         status.html("Response received");
         var Counters = response.responseText.evalJSON();
         if (Counters.length > 0)
+				$("#counterTable").empty();
         {
           for (var i = 0; i < Counters.length; i++)
           {
@@ -429,7 +432,7 @@ var Elk = (function(api)
             row.append('<td>' + Counters[i].index + '</td>');
             row.append('<td>' + Counters[i].label + '</td>');
             row.append('<td><form name ="' + Counters[i].index + '"><input name=counterValue type="text" value=' + Counters[i].value + '></input></td>');
-            row.append('<td><input type="submit" value="Set" class="btn1" onclick="Elk.setCounter(' + device + ',' + '\'' + Counters[i].index + '\'' + ',jQuery(\'#counterTable\'))"></input></<form></td>');
+            row.append('<td><input type="submit" value="Set" class="btn1" onclick="Elk.setCounter(' + device + ',' + '\'' + Counters[i].index + '\'' + ',jQuery(\'#counterTable\'),jQuery(\'#status\'))"></input></<form></td>');
           }
           status.html("Completed");
         }
@@ -445,12 +448,11 @@ var Elk = (function(api)
     });
   }
 
-  function setCounter(device, counter, table)
+  function setCounter(device, counter, table, status)
   {
 
-    //var value = table.rows[counter].cells[2].children[0].value
     var value = document.forms[counter].counterValue.value;
-    new Ajax.Request("../port_3480/data_request",
+    new Ajax.Request(requestURL + "/data_request",
     {
       method: "get",
       parameters:
@@ -465,8 +467,7 @@ var Elk = (function(api)
       },
       onSuccess: function(response)
       {
-        var time = response.responseText.evalJSON();
-        //getCounters(table, device)
+        getCounters(table, device, status)
       },
       onFailure: function() {}
     });
@@ -505,7 +506,7 @@ var Elk = (function(api)
 
   function getCustomValue(table, device, status)
   {
-    new Ajax.Request("../port_3480/data_request",
+    new Ajax.Request(requestURL + "/data_request",
     {
       method: "get",
       parameters:
@@ -584,7 +585,7 @@ var Elk = (function(api)
       var min = pad(parseInt(value.substr(3, 5), 10).toString(16), 2);
       value = pad(parseInt((hour + min), 16), 4);
     }
-    new Ajax.Request("../port_3480/data_request",
+    new Ajax.Request(requestURL + "/data_request",
     {
       method: "get",
       parameters:
