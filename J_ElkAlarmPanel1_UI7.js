@@ -432,7 +432,7 @@ var Elk = (function(api)
             row.append('<td>' + Counters[i].index + '</td>');
             row.append('<td>' + Counters[i].label + '</td>');
             row.append('<td><form name ="' + Counters[i].index + '"><input name=counterValue type="text" value=' + Counters[i].value + '></input></td>');
-            row.append('<td><input type="submit" value="Set" class="btn1" onclick="Elk.setCounter(' + device + ',' + '\'' + Counters[i].index + '\'' + ',jQuery(\'#counterTable\'),jQuery(\'#status\'))"></input></<form></td>');
+            row.append('<td><input type="submit" value="Set" class="btn1" onclick="Elk.setCounter(' + device + ',' + '\'' + Counters[i].index + '\'' + ',jQuery(\'#counterTable\'),jQuery(\'#status\'))"></input></form></td>');
           }
           status.html("Completed");
         }
@@ -467,9 +467,8 @@ var Elk = (function(api)
       },
       onSuccess: function(response)
       {
-        getCounters(table, device, status)
-      },
-      onFailure: function() {}
+        getCounters(table, device, status);
+      }
     });
   }
 
@@ -526,16 +525,17 @@ var Elk = (function(api)
           {
             var customIndex = Custom[i].index;
             var customValue = Custom[i].value;
-            var type = Custom[i].format;
-            if (type === 0)
+            var typeNumber = isNaN(parseInt(Custom[i].format,10))? 0 : parseInt(Custom[i].format,10);
+            var type = "";
+            if (typeNumber === 0)
             {
               type = "Number";
             }
-            else if (type == 1)
+            else if (typeNumber == 1)
             {
               type = "Timer";
             }
-            else if (type == 2)
+            else if (typeNumber == 2)
             {
               type = "Time Of Day";
               if (customValue.length == 1)
@@ -551,14 +551,13 @@ var Elk = (function(api)
               var min = pad(parseInt(customValue.substr(2, 3), 16), 2);
               customValue = hour + ":" + min;
             }
-
-
             row = jQuery('<tr>').appendTo(table);
             row.append('<td>' + Custom[i].index + '</td>');
             row.append('<td>' + Custom[i].label + '</td>');
-            row.append('<td><label>' + type + ' </label></td>');
-            row.append('<td><form name ="' + customIndex + '"><input type="text" value=' + customValue + ' name="' + type + '"></input></td>');
-            row.append('<td><input type="submit" value="Set" class="btn1" onclick="Elk.setCustom(' + device + ',' + '\'' + customIndex + '\'' + ',jQuery(\'#customTable\'))"></input></<form></td>');
+            row.append('<td>' + type + '</td>');
+            row.append('<td><form name ="' + customIndex + '"><input name=customValue type="text" value=' + customValue + '></td>');
+            row.append('<td><input type="submit" value="Set" class="btn1" onclick="Elk.setCustom(' + device + ',' + typeNumber + ',' + '\'' + customIndex + '\'' + ', jQuery(\'#customTable\'), jQuery(\'#status\'))"></input></form></td>');
+            
           }
           status.html("Completed");
         }
@@ -574,18 +573,16 @@ var Elk = (function(api)
     });
   }
 
-  function setCustom(device, custom, table)
+  function setCustom(device, type, custom, customTable, status)
   {
     var value = document.forms[custom].elements[0].value;
-    var type = document.forms[custom].elements[0].name;
-
-    if (type == "Time Of Day")
+    if (type == 2)
     {
       value = formatTime(value);
       var hour = pad(parseInt(value.substr(0, 2), 10).toString(16), 2);
       var min = pad(parseInt(value.substr(3, 5), 10).toString(16), 2);
       value = pad(parseInt((hour + min), 16), 4);
-    }
+    }    
     new Ajax.Request(requestURL + "/data_request",
     {
       method: "get",
@@ -601,10 +598,8 @@ var Elk = (function(api)
       },
       onSuccess: function(response)
       {
-        var custom = response.responseText.evalJSON();
-        //getCustomValue(table, device, status)
-      },
-      onFailure: function() {}
+        getCustomValue(customTable, device, status);
+      }
     });
   }
 
