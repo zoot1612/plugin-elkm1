@@ -556,7 +556,10 @@ var Elk = (function(api)
             row.append('<td>' + Custom[i].label + '</td>');
             row.append('<td>' + type + '</td>');
             row.append('<td><form name ="' + customIndex + '"><input name=customValue type="text" value=' + customValue + '></td>');
-            row.append('<td><input type="submit" value="Set" class="btn1" onclick="Elk.setCustom(' + device + ',' + typeNumber + ',' + '\'' + customIndex + '\'' + ', jQuery(\'#customTable\'), jQuery(\'#status\'))"></input></form></td>');
+            row.append('<td><input title="16 bit Custom Value (5 decimal ASCII digits). If the Custom Value Format = 2, \
+            Time of day, place the hours in bytes 3 and 4 as a 24 hour value and the minutes in bytes 1 and 2. example: 13:56" type="submit" value="Set" \
+            class="btn1" onclick="Elk.setCustom(' + device + ',' + typeNumber + ',' + '\'' + customIndex + '\'' + ', jQuery(\'#customTable\'), \
+            jQuery(\'#status\'))"></input></form></td>');
             
           }
           status.html("Completed");
@@ -613,7 +616,7 @@ var Elk = (function(api)
   function formatTime(time)
   {
     var result = false,
-      m;
+    m;
     var re = /^\s*([01]?\d|2[0-3]):?([0-5]\d)\s*$/;
     if ((m = time.match(re)))
     {
