@@ -1363,7 +1363,7 @@ end
 local function updateCounters (data)
   local counterNo = tonumber(data:sub(1, 2),10)
   if (g_counters[counterNo] ~=nil) then
-    g_counters[counterNo].value = tonumber(data:sub(3, 7),10)
+    g_counters[counterNo].value = tonumber(data:sub(3, 7),10) or 0
   end
 end
 
@@ -1371,8 +1371,8 @@ local function updateCustomValue(data)
     debug("updateCustomValue: Incoming data ".. data ..".")
     local customValue = tonumber(data:sub(1, 2),10)
     if (g_customs[customValue] ~=nil) then
-      g_customs[customValue].value = tonumber(data:sub(3, 7),10)
-      g_customs[customValue].format = tonumber(data:sub(8, 8),10)
+      g_customs[customValue].value = tonumber(data:sub(3, 7),10) or 0
+      g_customs[customValue].format = tonumber(data:sub(8, 8),10) or 0
     end
 end
 
@@ -2832,18 +2832,18 @@ local function createCounters()
 
       data = data:gsub("(%s+)$", "")
       local labelId = data:sub(1, 2)
-      --i = tonumber(data:sub(3,5))
-
-      --if i == 0 then
-        --debug("createCounters: Completed.")
-        --return true
-      --end
-
+      local index = tonumber(data:sub(3,5))
+      
       debug("createCounters: Creating counter ".. i ..".")
       g_counters[i] = {}
       local label = (data:sub(6) or "")
-      debug(string.format("createCounters: Adding name %s to counter at %03i.",label,i))
-      g_counters[i].label = label
+      if index ~= 0 then
+        debug(string.format("createCounters: Adding name %s to counter at %03i.",label,i))
+        g_counters[i].label = label
+      else
+        g_counters[i].label = "Not defined"
+      end
+      
     end
     i=i+1
   end
@@ -2868,14 +2868,15 @@ local function createCustomValues()
 
       data = data:gsub("(%s+)$", "")
       local labelId = data:sub(1, 2)
-      --local index = (tonumber(data:sub(6)) == 0) and 0 or tonumber(data:sub(3,5))
       local index = tonumber(data:sub(3,5))
       debug("createCustomValues: Creating custom  at index ".. i ..".")
       g_customs[i] = {}
       local label = (data:sub(6) or "")
       if index ~= 0 then
 				debug(string.format("createCustomValues: Adding name %s to custom at %03i.",label,index))
-        g_customs[index].label = label
+        g_customs[i].label = label
+      else
+        g_customs[i].label = "Not defined"
       end
     end
     i=i+1
