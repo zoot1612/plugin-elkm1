@@ -484,7 +484,7 @@ var Elk = (function(api)
 
     html += '<thead>';
     html += '<tr>';
-    html += '<th>INDEX</th><th>DESCRIPTION</th><th colspan="3">CUSTOM VALUE</th>';
+    html += '<th>INDEX</th><th>DESCRIPTION</th><th>TYPE</th><th colspan="2">CUSTOM VALUE</th>';
     html += '</tr>';
     html += '</thead>';
 
