@@ -611,7 +611,6 @@
       "Function":"advanced_device"
     }
   ],
-  "DeviceType":"urn:schemas-micasaverde-com:device:ElkAlarmPartition:1",
   "eventList2":[
     {
       "id":1,
