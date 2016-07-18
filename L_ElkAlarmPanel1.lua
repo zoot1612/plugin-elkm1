@@ -1,5 +1,5 @@
 -- Plugin Version
-local VERSION = "2.42"
+local VERSION = "2.421"
 
 -- Flags
 local DEBUG_MODE = true
@@ -1625,6 +1625,7 @@ local PANEL_RESPONSES = {
     description = "Ethernet Module Test",
     handlerFunc = function (self, data)
                     debug("handlerFunc Message type description: ".. self.description)
+                    processRTC(data)
                     HEARTBEAT = os.time()
                     return true
                   end
