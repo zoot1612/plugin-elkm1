@@ -2440,9 +2440,9 @@ local function uiVersionCheck()
 	if( luup.version_branch == 1 and luup.version_major == 7 and ui7Check == "false") then
 		luup.variable_set(ELK_SID, "UI7Check", "true", elk_device)
 		for k, v in pairs(g_partitions) do
-	    luup.attr_set("device_json", "D_ElkAlarmPartition1_UI7.json", g_partitions[k].devId)
-	    debug("Setting partition " .. k .. " with static json file for UI7.")
-	  end
+      luup.attr_set("device_json", "D_ElkAlarmPartition1_UI7.json", g_partitions[k].devId)
+      debug("Setting partition " .. k .. " with static json file for UI7.")
+    end
 		luup.attr_set("device_json", "D_ElkAlarmPanel1_UI7.json", elk_device)
 		debug("Setting ELK/NESS panel device " .. elk_device .. " with static json file for UI7.")
 		luup.reload()
