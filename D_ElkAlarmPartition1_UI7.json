@@ -65,8 +65,8 @@
 					},
 					"Display": {
 						"Top": 20,
-						"Left": 285,
-						"Width": 75,
+						"Left": 200,
+						"Width": 20,
 						"Height": 20
 					}
 				},
@@ -77,8 +77,8 @@
 					"Display": {
 						"Service": "urn:micasaverde-com:serviceId:AlarmPartition2",
 						"Variable": "DetailedArmMode",
-						"Top": 40,
-						"Left": 285,
+						"Top": 20,
+						"Left": 321,
 						"Width": 75,
 						"Height": 20
 					}
@@ -90,7 +90,7 @@
 						"text": "PIN Code:"
 					},
 					"Display": {
-						"Top": 80,
+						"Top": 260,
 						"Left": 70,
 						"Width": 75,
 						"Height": 20
@@ -100,8 +100,8 @@
 					"ControlType": "input",
 					"ID": "PINCode",
 					"Display": {
-						"Top": 105,
-						"Left": 70,
+						"Top": 260,
+						"Left": 200,
 						"Width": 75,
 						"Height": 20
 					}
@@ -113,8 +113,8 @@
 						"text": "Store"
 					},
 					"Display": {
-						"Top": 130,
-						"Left": 70,
+						"Top": 260,
+						"Left": 285,
 						"Width": 75,
 						"Height": 20
 					},
@@ -136,8 +136,8 @@
 						"text": "Clear"
 					},
 					"Display": {
-						"Top": 156,
-						"Left": 70,
+						"Top": 260,
+						"Left": 370,
 						"Width": 75,
 						"Height": 20
 					},
@@ -151,7 +151,7 @@
 					"ControlType": "label",
 					"Label": {
 						"lang_tag": "label_arm_mode",
-						"text": "Arm Mode:"
+						"text": "Arm Mode"
 					},
 					"Display": {
 						"Top": 80,
