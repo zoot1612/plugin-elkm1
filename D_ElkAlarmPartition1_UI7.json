@@ -369,6 +369,214 @@
 							}
 						]
 					}
+				},
+				{
+					"ControlType": "button",
+					"Label": {
+						"lang_tag": "button_f1",
+						"text": "F1"
+					},
+					"Display": {
+						"Service": "urn:micasaverde-com:serviceId:ElkAlarmPanel1",
+						"Variable": "FunctionKeyNo",
+						"Value": "f1",
+						"Top": 186,
+						"Left": 200,
+						"Width": 35,
+						"Height": 20
+					},
+					"Command": {
+						"Service": "urn:micasaverde-com:serviceId:ElkAlarmPanel1",
+						"Action": "FunctionKey",
+						"Parameters": [
+							{
+								"Name": "FunctionKeyNo",
+								"Value": 1
+							}
+						]
+					}
+				},       
+				{
+					"ControlType": "button",
+					"Label": {
+						"lang_tag": "button_f2",
+						"text": "F2"
+					},
+					"Display": {
+						"Service": "urn:micasaverde-com:serviceId:ElkAlarmPanel1",
+						"Variable": "FunctionKeyNo",
+						"Value": "f2",
+						"Top": 186,
+						"Left": 242,
+						"Width": 35,
+						"Height": 20
+					},
+					"Command": {
+						"Service": "urn:micasaverde-com:serviceId:ElkAlarmPanel1",
+						"Action": "FunctionKey",
+						"Parameters": [
+							{
+								"Name": "FunctionKeyNo",
+								"Value": 2
+							}
+						]
+					}
+				},
+				{
+					"ControlType": "button",
+					"Label": {
+						"lang_tag": "button_f3",
+						"text": "F3"
+					},
+					"Display": {
+						"Service": "urn:micasaverde-com:serviceId:ElkAlarmPanel1",
+						"Variable": "FunctionKeyNo",
+						"Value": "f3",
+						"Top": 186,
+						"Left": 284,
+						"Width": 35,
+						"Height": 20
+					},
+					"Command": {
+						"Service": "urn:micasaverde-com:serviceId:ElkAlarmPanel1",
+						"Action": "FunctionKey",
+						"Parameters": [
+							{
+								"Name": "FunctionKeyNo",
+								"Value": 3
+							}
+						]
+					}
+				},
+				{
+					"ControlType": "button",
+					"Label": {
+						"lang_tag": "button_f4",
+						"text": "F4"
+					},
+					"Display": {
+						"Service": "urn:micasaverde-com:serviceId:ElkAlarmPanel1",
+						"Variable": "FunctionKeyNo",
+						"Value": "f4",
+						"Top": 186,
+						"Left": 326,
+						"Width": 35,
+						"Height": 20
+					},
+					"Command": {
+						"Service": "urn:micasaverde-com:serviceId:ElkAlarmPanel1",
+						"Action": "FunctionKey",
+						"Parameters": [
+							{
+								"Name": "FunctionKeyNo",
+								"Value": 4
+							}
+						]
+					}
+				},
+				{
+					"ControlType": "button",
+					"Label": {
+						"lang_tag": "button_f5",
+						"text": "F5"
+					},
+					"Display": {
+						"Service": "urn:micasaverde-com:serviceId:ElkAlarmPanel1",
+						"Variable": "FunctionKeyNo",
+						"Value": "f5",
+						"Top": 186,
+						"Left": 368,
+						"Width": 35,
+						"Height": 20
+					},
+					"Command": {
+						"Service": "urn:micasaverde-com:serviceId:ElkAlarmPanel1",
+						"Action": "FunctionKey",
+						"Parameters": [
+							{
+								"Name": "FunctionKeyNo",
+								"Value": 5
+							}
+						]
+					}
+				},
+				{
+					"ControlType": "button",
+					"Label": {
+						"lang_tag": "button_f6",
+						"text": "F6"
+					},
+					"Display": {
+						"Service": "urn:micasaverde-com:serviceId:ElkAlarmPanel1",
+						"Variable": "FunctionKeyNo",
+						"Value": "f6",
+						"Top": 186,
+						"Left": 410,
+						"Width": 35,
+						"Height": 20
+					},
+					"Command": {
+						"Service": "urn:micasaverde-com:serviceId:ElkAlarmPanel1",
+						"Action": "FunctionKey",
+						"Parameters": [
+							{
+								"Name": "FunctionKeyNo",
+								"Value": 6
+							}
+						]
+					}
+				},
+				{
+					"ControlType": "button",
+					"Label": {
+						"lang_tag": "button_star",
+						"text": "*"
+					},
+					"Display": {
+						"Service": "urn:micasaverde-com:serviceId:ElkAlarmPanel1",
+						"Variable": "FunctionKeyNo",
+						"Value": "*",
+						"Top": 220,
+						"Left": 200,
+						"Width": 35,
+						"Height": 20
+					},
+					"Command": {
+						"Service": "urn:micasaverde-com:serviceId:ElkAlarmPanel1",
+						"Action": "FunctionKey",
+						"Parameters": [
+							{
+								"Name": "FunctionKeyNo",
+								"Value": "*"
+							}
+						]
+					}
+				},
+				{
+					"ControlType": "button",
+					"Label": {
+						"lang_tag": "button_chime",
+						"text": "Chime"
+					},
+					"Display": {
+						"Service": "urn:micasaverde-com:serviceId:AlarmPartition2",
+						"Variable": "ChimeEnabled",
+						"Value": "1",
+						"Top": 220,
+						"Left": 240,
+						"Width": 75,
+						"Height": 20
+					},
+					"Command": {
+						"Service": "urn:micasaverde-com:serviceId:ElkAlarmPanel1",
+						"Action": "FunctionKey",
+						"Parameters": [
+							{
+								"Name": "FunctionKeyNo",
+								"Value": "C"
+							}
+						]
+					}
 				}
 			]
 		},
