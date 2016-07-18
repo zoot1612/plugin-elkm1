@@ -48,6 +48,20 @@
 						"Action": "ClearTask",
 						"Parameters": []
 					}
+				},
+				{
+					"ControlGroup": "1",
+					"ControlType": "variable",
+					"left": "0",
+					"text_align": "left",
+					"Display": {
+						"Service": "urn:micasaverde-com:serviceId:ElkAlarmPanel1",
+						"Variable": "ElkRTC",
+						"Top": 20,
+						"Left": 80,
+						"Width": 75,
+						"Height": 20
+					}
 				}
 			]
 		},
