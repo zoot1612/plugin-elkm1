@@ -165,5 +165,5 @@
       ]
     }
   ],
-  "DeviceType":"urn:schemas-micasaverde-com:device:ElkAlarmPanel:1"
+  "device_type":"urn:schemas-micasaverde-com:device:ElkAlarmPanel:1"
 }
