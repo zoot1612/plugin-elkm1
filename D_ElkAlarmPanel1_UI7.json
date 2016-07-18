@@ -56,8 +56,8 @@
 						"Service": "urn:micasaverde-com:serviceId:ElkAlarmPanel1",
 						"Variable": "ElkRTC",
 						"Top": 40,
-						"Left": 80,
-						"Width": 75,
+						"Left": 50,
+						"Width": 100,
 						"Height": 20
 					}
 				}
