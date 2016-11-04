@@ -1,5 +1,5 @@
 -- Plugin Version
-local VERSION = "2.421"
+local VERSION = "2.422"
 
 -- Flags
 local DEBUG_MODE = true
