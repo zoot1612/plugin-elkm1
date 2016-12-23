@@ -1,5 +1,5 @@
 -- Plugin Version
-local VERSION = "2.422"
+local VERSION = "2.423"
 
 -- Flags
 local DEBUG_MODE = true
@@ -1333,15 +1333,18 @@ local function processLabels (data)
   local num = tonumber(data:sub(3, 5))
 
   if (num == 0) then
-    log("processLabels: Label type: " .. tostring(LABEL_TYPES[labelId]) .. " No processing.")
+    debug("processLabels: Label type: " .. tostring(LABEL_TYPES[labelId]) .. " No processing.")
     return
   else
     if (labelId == "00") then
-      g_zones[num].label = data:sub(6)
+      if (g_zones[num] ~= nil) then			
+        g_zones[num].label = data:sub(6)
+      end
     elseif (labelId == "01") then
-      g_partitions[num].label = data:sub(6)
+      if (g_partitions[num] ~= nil) then		
+        g_partitions[num].label = data:sub(6)
+      end		
     elseif (labelId == "03") then
-      --g_keypads[num].label = data:sub(6)
       if (g_tempSensors[num] ~= nil) then
         g_tempSensors[num].label = data:sub(6)
       end
