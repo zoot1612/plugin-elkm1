@@ -1,5 +1,5 @@
 -- Plugin Version
-local VERSION = "2.424"
+local VERSION = "2.425"
 
 -- Flags
 local DEBUG_MODE = true
@@ -2705,14 +2705,14 @@ local function createOutputs()
       local labelId = data:sub(1, 2)
       i = tonumber(data:sub(3,5))
       if i == 0 then
-        debug("createOutputs: Completed.")
-        return true
+        debug("createOutputs: skipping output ".. i ..".")
+      else
+        debug("createOutputs: Creating output ".. i ..".")
+        g_outputs[i] = {}
+        local label = (data:sub(6) or "")
+        debug(string.format("createOutputs: Adding name %s to output %03i.",label,i))
+        g_outputs[i].label = label
       end
-      debug("createOutputs: Creating output ".. i ..".")
-      g_outputs[i] = {}
-      local label = (data:sub(6) or "")
-      debug(string.format("createOutputs: Adding name %s to output %03i.",label,i))
-      g_outputs[i].label = label
     end
     i=i+1
   end
