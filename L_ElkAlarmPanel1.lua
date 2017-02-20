@@ -1,5 +1,5 @@
 -- Plugin Version
-local VERSION = "2.423"
+local VERSION = "2.424"
 
 -- Flags
 local DEBUG_MODE = true
@@ -436,7 +436,7 @@ local function processArmingStatusReport (data)
     g_partitions[i].alarmState = A[i]
 
     if (A[i] >= '3') then -- We have an alarm.
-      local message = string.format("ALARM: %s, %s", ALARM_STATES[A[i]], g_partitions[i].label or "")
+      local message = string.format("ALARM: %s, %s", (ALARM_STATES[A[i]] or "Unknown Alarm State"), (g_partitions[i].label or ""))
       log(message)
       task(message, TASK_ERROR_PERM)
 
@@ -1339,14 +1339,17 @@ local function processLabels (data)
     if (labelId == "00") then
       if (g_zones[num] ~= nil) then			
         g_zones[num].label = data:sub(6)
+	debug("processLabels: Label type: " .. tostring(LABEL_TYPES[labelId]) .. " Zone:" .. num .. " Label:" .. data:sub(6),1)			
       end
     elseif (labelId == "01") then
       if (g_partitions[num] ~= nil) then		
         g_partitions[num].label = data:sub(6)
+	debug("processLabels: Label type: " .. tostring(LABEL_TYPES[labelId]) .. " Partition:" .. num .. " Label:" .. data:sub(6),1)			
       end		
     elseif (labelId == "03") then
       if (g_tempSensors[num] ~= nil) then
         g_tempSensors[num].label = data:sub(6)
+	debug("processLabels: Label type: " .. tostring(LABEL_TYPES[labelId]) .. " Temp Sensor:" .. num .. " Label:" .. data:sub(6),1)			
       end
     else
       debug("processLabels: Label type: " .. tostring(LABEL_TYPES[labelId]) .. " No processing.")
