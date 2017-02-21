@@ -2531,8 +2531,8 @@ end
 
 local function getZoneType()
   for k, v in pairs(g_zones) do
-	  local id = g_zones[k].devId or "none"
-	  local alarmType = g_zones[k].alarmtype or ""
+    local id = g_zones[k].devId or "none"
+    local alarmType = g_zones[k].alarmtype or ""
     debug("getZoneType: Getting type for zone "..id.. " with alarm type " .. alarmType .. ".")
     luup.variable_set(ELK_SID, "zone_type",(ZONE_DEFINITIONS[alarmType].discription or ""), id)
   end
@@ -2619,8 +2619,6 @@ local function createUsers()
   local functionName = "createUsers"
   local errorMessage = "Failed to create user"
 
-
-
   local i = 1
   while (i >=1 and i <=199) do
     local status = sendIntercepted("sd", functionName, errorMessage, string.format("02%03d", i))
@@ -2629,25 +2627,20 @@ local function createUsers()
       if (not status) then
         return false
       end
-
       data = data:gsub("(%s+)$", "")
-
       if (data:sub(6,13) == string.format("USER %03i",i)) then
-        debug("createUsers: Completed.")
-        return true
-      end
-
-      local labelId = data:sub(1, 2)
-      local label = data:sub(6)
-      debug("createUsers: Creating user ".. i ..".")
-
-      g_users[i] = {}
-      debug(string.format("createUsers: Adding name %s to user %03i.",label,i))
-      g_users[i].label = label
+        debug("createUsers: skipping user ".. i ..".")
+      else				
+        local labelId = data:sub(1, 2)
+        local label = data:sub(6)
+        g_users[i] = {}
+        debug(string.format("createUsers: Adding name %s to user %03i.",label,i))
+        g_users[i].label = label
+      end			
     end
     i=i+1
   end
-
+  debug("createUsers: Completed.")
   return true
 end
 
@@ -2666,23 +2659,21 @@ local function createTasks()
       if (not status) then
         return false
       end
-
       data = data:gsub("(%s+)$", "")
       local labelId = data:sub(1, 2)
       i = tonumber(data:sub(3,5))
       if i == 0 then
-        debug("createTasks: Completed.")
-        return true
-      end
-      debug("createTasks: Creating task ".. i ..".")
-      g_tasks[i] = {}
-      local label = (data:sub(6) or "")
-      debug(string.format("createTasks: Adding name %s to task %03i.",label,i))
-      g_tasks[i].label = label
+        debug("createTasks: skipping task ".. i ..".")
+      else
+        g_tasks[i] = {}
+        local label = (data:sub(6) or "")
+        debug(string.format("createTasks: Adding name %s to task %03i.",label,i))
+        g_tasks[i].label = label
+      end		
     end
     i=i+1
   end
-
+  debug("createTasks: Completed",1)
   return true
 end
 
@@ -2700,23 +2691,22 @@ local function createOutputs()
       if (not status) then
         return false
       end
-
       data = data:gsub("(%s+)$", "")
       local labelId = data:sub(1, 2)
       i = tonumber(data:sub(3,5))
       if i == 0 then
         debug("createOutputs: skipping output ".. i ..".")
       else
-        debug("createOutputs: Creating output ".. i ..".")
         g_outputs[i] = {}
+				
         local label = (data:sub(6) or "")
-        debug(string.format("createOutputs: Adding name %s to output %03i.",label,i))
+        debug(string.format("createOutputs: Adding name %s to output %03i.", label, i))
         g_outputs[i].label = label
       end
     end
     i=i+1
   end
-
+  debug("createOutputs: Completed",1)
   return true
 end
 
@@ -2733,7 +2723,6 @@ local function getOutputs()
     log("(ElkPlugin::getOutputs) No output controls.")  
     return
   end
-
   for outputNo in outputs:gmatch("%d+") do
     debug("getOutputs: Creating output ".. outputNo ..".")
     outputNo = tonumber(outputNo)
@@ -2758,23 +2747,21 @@ local function createThermostats()
       if (not status) then
         return false
       end
-
       data = data:gsub("(%s+)$", "")
       local labelId = data:sub(1, 2)
       i = tonumber(data:sub(3,5))
       if i == 0 then
-        debug("createThermostats: Completed.")
-        return true
-      end
-      debug("createThermostats: Creating thermostat ".. i ..".")
-      g_thermostats[i] = {}
-      local label = (data:sub(6) or "")
-      debug(string.format("(createThermostats: Adding name %s to thermostat %03i.",label,i))
-      g_thermostats[i].label = label
+        debug("createThermostats: Skipping thermostat ".. i ..".")
+      else
+        g_thermostats[i] = {}
+        local label = (data:sub(6) or "")
+        debug(string.format("(createThermostats: Adding name %s to thermostat %03i.",label,i))
+        g_thermostats[i].label = label
+      end	
     end
     i=i+1
   end
-
+  debug("createThermostats: Completed",1)
   return true
 end
 
@@ -2802,23 +2789,21 @@ local function createKeypads()
       if (not status) then
         return false
       end
-
       data = data:gsub("(%s+)$", "")
       local labelId = data:sub(1, 2)
       i = tonumber(data:sub(3,5))
       if i == 0 then
-        debug("createKeypads: Completed.")
-        return true
-      end
-      debug("createKeypads: Creating output ".. i ..".")
-      g_keypads[i] = {}
-      local label = (data:sub(6) or "")
-      debug(string.format("createKeypads: Adding name %s to keypad %03i.",label,i))
-      g_keypads[i].label = label
+        debug("createKeypads: Skipping keypad ".. i ..".")
+      else
+        g_keypads[i] = {}
+        local label = (data:sub(6) or "")
+        debug(string.format("createKeypads: Adding name %s to keypad %03i.",label,i))
+        g_keypads[i].label = label
+      end		
     end
     i=i+1
   end
-
+  debug("ccreateKeypads: Completed",1)
   return true
 end
 
@@ -2880,7 +2865,7 @@ local function createCustomValues()
       g_customs[i] = {}
       local label = (data:sub(6) or "")
       if index ~= 0 then
-				debug(string.format("createCustomValues: Adding name %s to custom at %03i.",label,index))
+        debug(string.format("createCustomValues: Adding name %s to custom at %03i.",label,index))
         g_customs[i].label = label
       else
         g_customs[i].label = "Not defined"
@@ -2888,7 +2873,7 @@ local function createCustomValues()
     end
     i=i+1
   end
-  debug("createCustomValues Completed.")
+  debug("createCustomValues: Completed.")
   return true
 end
 
@@ -2903,25 +2888,22 @@ local function createLights()
       if (not status) then
         return false
       end
-      
       data = data:gsub("(%s+)$", "")  
       local labelId = data:sub(1, 2)
       local index = (tonumber(data:sub(6)) == 0) and 0 or tonumber(data:sub(3,5))
-    
       if index == 0 then
-        debug("createLights: Completed.")
-        return true
+        debug("createLights: skipping light ".. i ..".")
       else
         g_lights[index] = {}
-        debug("createLights: Creating light at index ".. index ..".")
         local label = (data:sub(6) or "")
         debug(string.format("createLights: Adding name %s to light at %03i.",label,index))
         g_lights[index].label = label
       end
-      
     end
     i=i+1
   end
+  debug("createLights: Completed.")
+  return true
 end
 
 
