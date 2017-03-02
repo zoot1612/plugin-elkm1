@@ -1,5 +1,5 @@
 -- Plugin Version
-local VERSION = "2.426"
+local VERSION = "2.427"
 
 -- Flags
 local DEBUG_MODE = true
@@ -435,8 +435,8 @@ local function processArmingStatusReport (data)
     g_partitions[i].armUpState = U[i]
     g_partitions[i].alarmState = A[i]
 
-    if (A[i] >= '3') then -- We have an alarm.
-      local message = string.format("ALARM: %s, %s", (ALARM_STATES[A[i]] or "Unknown Alarm State"), (g_partitions[i].label or ""))
+    if (A[i] >= '3' and A[i] <= 'B') then -- We have an alarm.
+      local message = string.format("ALARM: %s, %s", (ALARM_STATES[A[i]]), (g_partitions[i].label or ""))
       log(message)
       task(message, TASK_ERROR_PERM)
 
@@ -449,6 +449,11 @@ local function processArmingStatusReport (data)
         setPartitionState (i, "AlarmMemory", "0")
         clearStatusMessage()
       end
+      if (A[i] < '3' or A[i] > 'B') then -- We have an unknown alarm type.
+	local message = string.format("Unknown alarm type: %s, %s", A[i], (g_partitions[i].label or ""))
+	log(message)
+	task(message, TASK_SUCCESS)			
+      end			
     end
   end
 
