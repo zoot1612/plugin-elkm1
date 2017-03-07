@@ -1,5 +1,5 @@
 -- Plugin Version
-local VERSION = "2.427"
+local VERSION = "2.428"
 
 -- Flags
 local DEBUG_MODE = true
@@ -3504,16 +3504,15 @@ function elkStartup (lul_device)
   POLL_MIN_DELAY = tonumber(luup.variable_get(HADEVICE_SID, "PollMinDelay", 1),  10)
   POLL_FREQUENCY = tonumber(luup.variable_get(HADEVICE_SID, "PollFrequency", 1), 10)
 
-  HEARTBEAT = os.time()
-
-  luup.call_delay("getTroubleReport", 5, "")
-  luup.call_delay("getHeartbeat", 10, "")
-
   luup.register_handler("callbackHandler", "ElkEvent")
   luup.register_handler("callbackHandler", "ElkRTC")
   luup.register_handler("callbackHandler", "ElkCounters")
   luup.register_handler("callbackHandler", "ElkCustom")
-
+	
+  luup.call_delay("getTroubleReport", 20, "")
+  HEARTBEAT = os.time()
+  luup.call_delay("getHeartbeat", 30, "")
+	
   luup.set_failure(false, lul_device)
   debug("Elk Plugin Startup SUCCESS: Startup successful.")
 
