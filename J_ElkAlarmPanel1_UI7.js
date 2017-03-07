@@ -60,11 +60,13 @@ var Elk = (function(api)
   function troubleTab(device)
   {
     var troubleReportList = api.getDeviceState(device, ELK_SID, "TroubleReport", 1);
-    var trouble = troubleReportList.split(',');
+    var trouble = new Array();
+    trouble = troubleReportList.split(';');
     var html = newLayout();
     html += '<div class="clearfix">';
     html += '<h1>ELK/NESS ALARM PANEL TROUBLE</h1>';
-
+    html += '<table class="table" >';
+    
     html += '<thead>';
     html += '<tr>';
     html += '<th>TROUBLE DISCRIPTION</th>';
@@ -88,14 +90,14 @@ var Elk = (function(api)
 
   function troubleReport(table, trouble, device, status)
   {
+    var row = jQuery("<tr>").appendTo(table);
     if (trouble.length > 0)
     {
       for (var i = 0; i < trouble.length; i++)
       {
-        var row = jQuery("<tr>").appendTo(table);
         row.append('<td>' + trouble[i] + '</td>');
       }
-      status.html("Completed");
+      status.html('Completed');
     }
     else
     {

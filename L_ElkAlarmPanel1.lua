@@ -1,5 +1,5 @@
 -- Plugin Version
-local VERSION = "2.428"
+local VERSION = "2.429"
 
 -- Flags
 local DEBUG_MODE = true
@@ -663,7 +663,7 @@ local function processSystemTroubleStatus (data)
       table.insert(troubleList, message)
     end
   end
-  luup.variable_set(ELK_SID, "TroubleReport",(table.concat(troubleList,",")), elk_device)
+  luup.variable_set(ELK_SID, "TroubleReport",(table.concat(troubleList, ";")), elk_device)
 end
 
 function get_event_string(event)
