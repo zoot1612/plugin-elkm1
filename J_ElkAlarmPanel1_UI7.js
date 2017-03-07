@@ -60,6 +60,7 @@ var Elk = (function(api)
   function troubleTab(device)
   {
     var troubleReportList = api.getDeviceState(device, ELK_SID, "TroubleReport", 1);
+    console.log("Trouble list contains %s", troubleReportList);
     var trouble = troubleReportList.split(',');
     var html = newLayout();
     html += '<div class="clearfix">';
