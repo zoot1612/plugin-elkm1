@@ -123,7 +123,7 @@ function layout()
 function troubleTab(device)
 {
   var troubleReportList = get_device_state(device, ELK_SID, "TroubleReport", 1);
-  var trouble = troubleReportList.split(',');
+  var trouble = troubleReportList.split(';');
   var html = layout();
   //<!-- CENTTERED COLUMN ON THE PAGE-->/
   html += '<div id="divContainer">';
