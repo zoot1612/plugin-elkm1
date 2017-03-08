@@ -1,5 +1,5 @@
 -- Plugin Version
-local VERSION = "2.429"
+local VERSION = "2.430"
 
 -- Flags
 local DEBUG_MODE = true
@@ -142,6 +142,7 @@ local ALARM_STATES = {
   ['@'] = "WaterAlarm",
   ['A'] = "FireSupervisory",
   ['B'] = "VerifyFire",
+  ['d'] = "ResetSensorRequired",
 }
 
 local ZONE_DEFINITIONS = {
@@ -392,7 +393,7 @@ local function checkMessage (msg)
     return nil
   end
 
-  return msgType, data
+  return msgType, data, misc
 end
 
 function commandRetry(func)
@@ -435,11 +436,10 @@ local function processArmingStatusReport (data)
     g_partitions[i].armUpState = U[i]
     g_partitions[i].alarmState = A[i]
 
-    if (A[i] >= '3' and A[i] <= 'B') then -- We have an alarm.
+    if (A[i] >= '3' and A[i] <= 'B' or A[i] == 'd') then -- We have an alarm.
       local message = string.format("ALARM: %s, %s", (ALARM_STATES[A[i]]), (g_partitions[i].label or ""))
       log(message)
       task(message, TASK_ERROR_PERM)
-
       setPartitionState (i, "Alarm", "Active")
       setPartitionState (i, "AlarmMemory", "1")
       setPartitionState (i, "LastAlarmActive", os.date())
@@ -449,14 +449,9 @@ local function processArmingStatusReport (data)
         setPartitionState (i, "AlarmMemory", "0")
         clearStatusMessage()
       end
-      if (A[i] < '3' or A[i] > 'B') then -- We have an unknown alarm type.
-	local message = string.format("Unknown alarm type: %s, %s", A[i], (g_partitions[i].label or ""))
-	log(message)
-	task(message, TASK_SUCCESS)			
-      end			
     end
   end
-
+  
   for k, v in pairs(g_partitions) do
     local message = string.format("armingStatus=%s, armUpState=%s, alarmState=%s", v.armingStatus, v.armUpState, v.alarmState)
     debug("processArmingStatusReport: partition " .. tostring(k) .. ", " .. message)
@@ -479,6 +474,12 @@ local function processArmingStatusReport (data)
         log("processArmingStatusReport: Impossible combination of 'armingStatus' and 'armUpState'.")
       end
     end
+  end
+end
+
+local function processAlarmMemoryUpdate(data)
+  for i in pairs(g_partitions) do
+    setPartitionState (i, "AlarmMemory1", data:sub(i, i))
   end
 end
 
@@ -668,394 +669,394 @@ end
 
 function get_event_string(event)
     local EVENTS = {
-    ['1000'] = 	{'No Event', '0'},
-    ['1001'] = 	{'FIRE ALARM', '1'},
-    ['1002'] = 	{'FIRE SUPERVISORY ALARM', '1'},
-    ['1003'] = 	{'BURGLAR ALARM, ANY AREA', '1'},
-    ['1004'] = 	{'MEDICAL ALARM, ANY AREA', '1'},
-    ['1005'] = 	{'POLICE ALARM, ANY AREA', '1'},
-    ['1006'] = 	{'AUX1 24 HR, ANY AREA', '1'},
-    ['1007'] = 	{'AUX2 24 HR, ANY AREA', '1'},
-    ['1008'] = 	{'CARBON MONOXIDE ALARM, ANY AREA', '1'},
-    ['1009'] = 	{'EMERGENCY ALARM, ANY AREA', '1'},
-    ['1010'] = 	{'FREEZE ALARM, ANY AREA', '1'},
-    ['1011'] = 	{'GAS ALARM, ANY AREA', '1'},
-    ['1012'] = 	{'HEAT ALARM, ANY AREA', '1'},
-    ['1013'] = 	{'WATER ALARM, ANY AREA', '1'},
-    ['1014'] = 	{'ALARM, ANY AREA', '1'},
-    ['1015'] = 	{'BURGLAR ALARM IN AREA 1', '1'},
-    ['1016'] = 	{'BURGLAR ALARM IN AREA 2', '1'},
-    ['1017'] = 	{'BURGLAR ALARM IN AREA 3', '1'},
-    ['1018'] = 	{'BURGLAR ALARM IN AREA 4', '1'},
-    ['1019'] = 	{'BURGLAR ALARM IN AREA 5', '1'},
-    ['1020'] = 	{'BURGLAR ALARM IN AREA 6', '1'},
-    ['1021'] = 	{'BURGLAR ALARM IN AREA 7', '1'},
-    ['1022'] = 	{'BURGLAR ALARM IN AREA 8', '1'},
-    ['1023'] = 	{'MEDICAL ALARM IN AREA 1', '1'},
-    ['1024'] = 	{'MEDICAL ALARM IN AREA 2', '1'},
-    ['1025'] = 	{'MEDICAL ALARM IN AREA 3', '1'},
-    ['1026'] = 	{'MEDICAL ALARM IN AREA 4', '1'},
-    ['1027'] = 	{'MEDICAL ALARM IN AREA 5', '1'},
-    ['1028'] = 	{'MEDICAL ALARM IN AREA 6', '1'},
-    ['1029'] = 	{'MEDICAL ALARM IN AREA 7', '1'},
-    ['1030'] = 	{'MEDICAL ALARM IN AREA 8', '1'},
-    ['1031'] = 	{'POLICE ALARM IN AREA 1', '1'},
-    ['1032'] = 	{'POLICE ALARM IN AREA 2', '1'},
-    ['1033'] = 	{'POLICE ALARM IN AREA 3', '1'},
-    ['1034'] = 	{'POLICE ALARM IN AREA 4', '1'},
-    ['1035'] = 	{'POLICE ALARM IN AREA 5', '1'},
-    ['1036'] = 	{'POLICE ALARM IN AREA 6', '1'},
-    ['1037'] = 	{'POLICE ALARM IN AREA 7', '1'},
-    ['1038'] = 	{'POLICE ALARM IN AREA 8', '1'},
-    ['1039'] = 	{'AUX1 24 HR IN AREA 1', '1'},
-    ['1040'] = 	{'AUX1 24 HR IN AREA 2', '1'},
-    ['1041'] = 	{'AUX1 24 HR IN AREA 3', '1'},
-    ['1042'] = 	{'AUX1 24 HR IN AREA 4', '1'},
-    ['1043'] = 	{'AUX1 24 HR IN AREA 5', '1'},
-    ['1044'] = 	{'AUX1 24 HR IN AREA 6', '1'},
-    ['1045'] = 	{'AUX1 24 HR IN AREA 7', '1'},
-    ['1046'] = 	{'AUX1 24 HR IN AREA 8', '1'},
-    ['1047'] = 	{'AUX2 24 HR IN AREA 1', '1'},
-    ['1048'] = 	{'AUX2 24 HR IN AREA 2', '1'},
-    ['1049'] = 	{'AUX2 24 HR IN AREA 3', '1'},
-    ['1050'] = 	{'AUX2 24 HR IN AREA 4', '1'},
-    ['1051'] = 	{'AUX2 24 HR IN AREA 5', '1'},
-    ['1052'] = 	{'AUX2 24 HR IN AREA 6', '1'},
-    ['1053'] = 	{'AUX2 24 HR IN AREA 7', '1'},
-    ['1054'] = 	{'AUX2 24 HR IN AREA 8', '1'},
-    ['1055'] = 	{'CO ALARM IN AREA 1', '1'},
-    ['1056'] = 	{'CO ALARM IN AREA 2', '1'},
-    ['1057'] = 	{'CO ALARM IN AREA 3', '1'},
-    ['1058'] = 	{'CO ALARM IN AREA 4', '1'},
-    ['1059'] = 	{'CO ALARM IN AREA 5', '1'},
-    ['1060'] = 	{'CO ALARM IN AREA 6', '1'},
-    ['1061'] = 	{'CO ALARM IN AREA 7', '1'},
-    ['1062'] = 	{'CO ALARM IN AREA 8', '1'},
-    ['1063'] = 	{'EMERGENCY ALARM IN AREA 1', '1'},
-    ['1064'] = 	{'EMERGENCY ALARM IN AREA 2', '1'},
-    ['1065'] = 	{'EMERGENCY ALARM IN AREA 3', '1'},
-    ['1066'] = 	{'EMERGENCY ALARM IN AREA 4', '1'},
-    ['1067'] = 	{'EMERGENCY ALARM IN AREA 5', '1'},
-    ['1068'] = 	{'EMERGENCY ALARM IN AREA 6', '1'},
-    ['1069'] = 	{'EMERGENCY ALARM IN AREA 7', '1'},
-    ['1070'] = 	{'EMERGENCY ALARM IN AREA 8', '1'},
-    ['1071'] = 	{'FREEZE ALARM IN AREA 1', '1'},
-    ['1072'] = 	{'FREEZE ALARM IN AREA 2', '1'},
-    ['1073'] = 	{'FREEZE ALARM IN AREA 3', '1'},
-    ['1074'] = 	{'FREEZE ALARM IN AREA 4', '1'},
-    ['1075'] = 	{'FREEZE ALARM IN AREA 5', '1'},
-    ['1076'] = 	{'FREEZE ALARM IN AREA 6', '1'},
-    ['1077'] = 	{'FREEZE ALARM IN AREA 7', '1'},
-    ['1078'] = 	{'FREEZE ALARM IN AREA 8', '1'},
-    ['1079'] = 	{'GAS ALARM IN AREA 1', '1'},
-    ['1080'] = 	{'GAS ALARM IN AREA 2', '1'},
-    ['1081'] = 	{'GAS ALARM IN AREA 3', '1'},
-    ['1082'] = 	{'GAS ALARM IN AREA 4', '1'},
-    ['1083'] = 	{'GAS ALARM IN AREA 5', '1'},
-    ['1084'] = 	{'GAS ALARM IN AREA 6', '1'},
-    ['1085'] = 	{'GAS ALARM IN AREA 7', '1'},
-    ['1086'] = 	{'GAS ALARM IN AREA 8', '1'},
-    ['1087'] = 	{'HEAT ALARM IN AREA 1', '1'},
-    ['1088'] = 	{'HEAT ALARM IN AREA 2', '1'},
-    ['1089'] = 	{'HEAT ALARM IN AREA 3', '1'},
-    ['1090'] = 	{'HEAT ALARM IN AREA 4', '1'},
-    ['1091'] = 	{'HEAT ALARM IN AREA 5', '1'},
-    ['1092'] = 	{'HEAT ALARM IN AREA 6', '1'},
-    ['1093'] = 	{'HEAT ALARM IN AREA 7', '1'},
-    ['1094'] = 	{'HEAT ALARM IN AREA 8', '1'},
-    ['1095'] = 	{'WATER ALARM IN AREA 1', '1'},
-    ['1096'] = 	{'WATER ALARM IN AREA 2', '1'},
-    ['1097'] = 	{'WATER ALARM IN AREA 3', '1'},
-    ['1098'] = 	{'WATER ALARM IN AREA 4', '1'},
-    ['1099'] = 	{'WATER ALARM IN AREA 5', '1'},
-    ['1100'] = 	{'WATER ALARM IN AREA 6', '1'},
-    ['1101'] = 	{'WATER ALARM IN AREA 7', '1'},
-    ['1102'] = 	{'WATER ALARM IN AREA 8', '1'},
-    ['1103'] = 	{'ANY ALARM IN AREA 1', '1'},
-    ['1104'] = 	{'ANY ALARM IN AREA 2', '1'},
-    ['1105'] = 	{'ANY ALARM IN AREA 3', '1'},
-    ['1106'] = 	{'ANY ALARM IN AREA 4', '1'},
-    ['1107'] = 	{'ANY ALARM IN AREA 5', '1'},
-    ['1108'] = 	{'ANY ALARM IN AREA 6', '1'},
-    ['1109'] = 	{'ANY ALARM IN AREA 7', '1'},
-    ['1110'] = 	{'ANY ALARM IN AREA 8', '1'},
-    ['1111'] = 	{'CODE LOCKOUT, ANY KEYPAD', '0'},
-    ['1112'] = 	{'KEYPAD 01 CODE-LOCKOUT', '0'},
-    ['1113'] = 	{'KEYPAD 02 CODE-LOCKOUT', '0'},
-    ['1114'] = 	{'KEYPAD 03 CODE-LOCKOUT', '0'},
-    ['1115'] = 	{'KEYPAD 04 CODE-LOCKOUT', '0'},
-    ['1116'] = 	{'KEYPAD 05 CODE-LOCKOUT', '0'},
-    ['1117'] = 	{'KEYPAD 06 CODE-LOCKOUT', '0'},
-    ['1118'] = 	{'KEYPAD 07 CODE-LOCKOUT', '0'},
-    ['1119'] = 	{'KEYPAD 08 CODE-LOCKOUT', '0'},
-    ['1120'] = 	{'KEYPAD 09 CODE-LOCKOUT', '0'},
-    ['1121'] = 	{'KEYPAD 10 CODE-LOCKOUT', '0'},
-    ['1122'] = 	{'KEYPAD 11 CODE-LOCKOUT', '0'},
-    ['1123'] = 	{'KEYPAD 12 CODE-LOCKOUT', '0'},
-    ['1124'] = 	{'KEYPAD 13 CODE-LOCKOUT', '0'},
-    ['1125'] = 	{'KEYPAD 14 CODE-LOCKOUT', '0'},
-    ['1126'] = 	{'KEYPAD 15 CODE-LOCKOUT', '0'},
-    ['1127'] = 	{'KEYPAD 16 CODE-LOCKOUT', '0'},
-    ['1128'] = 	{'FIRE TROUBLE, ANY ZONE', '1'},
-    ['1129'] = 	{'BURGLAR TROUBLE, ANY ZONE', '1'},
-    ['1130'] = 	{'FAIL TO COMMUNICATE TROUBLE', '0'},
-    ['1131'] = 	{'RF SENSOR LOW BATTERY TROUBLE', '1'},
-    ['1132'] = 	{'LOST ANC MODULE TROUBLE', '3'},
-    ['1133'] = 	{'LOST KEYPAD TROUBLE', '3'},
-    ['1134'] = 	{'LOST INPUT EXPANDER TROUBLE', '3'},
-    ['1135'] = 	{'LOST OUTPUT EXPANDER TROUBLE', '3'},
-    ['1136'] = 	{'EEPROM MEMORY ERROR TROUBLE', '4'},
-    ['1137'] = 	{'FLASH MEMORY ERROR TROUBLE', '0'},
-    ['1138'] = 	{'AC FAILURE TROUBLE', '0'},
-    ['1139'] = 	{'CONTROL LOW BATTERY TROUBLE', '0'},
-    ['1140'] = 	{'CONTROL OVER CURRENT TROUBLE', '0'},
-    ['1141'] = 	{'EXPANSION MODULE TROUBLE', '3'},
-    ['1142'] = 	{'OUTPUT 2 SUPERVISORY TROUBLE', '0'},
-    ['1143'] = 	{'TELEPHONE LINE FAULT TROUBLE1', '0'},
-    ['1144'] = 	{'RESTORE FIRE ZONE', '1'},
-    ['1145'] = 	{'RESTORE FIRE SUPERVISORY ZONE', '1'},
-    ['1146'] = 	{'RESTORE BURGLAR ZONE', '1'},
-    ['1147'] = 	{'RESTORE MEDICAL ZONE', '1'},
-    ['1148'] = 	{'RESTORE POLICE ZONE', '1'},
-    ['1149'] = 	{'RESTORE AUX1 24 HR ZONE', '1'},
-    ['1150'] = 	{'RESTORE AUX2 24 HR ZONE', '1'},
-    ['1151'] = 	{'RESTORE CO ZONE', '1'},
-    ['1152'] = 	{'RESTORE EMERGENCY ZONE', '1'},
-    ['1153'] = 	{'RESTORE FREEZE ZONE', '1'},
-    ['1154'] = 	{'RESTORE GAS ZONE', '1'},
-    ['1155'] = 	{'RESTORE HEAT ZONE', '1'},
-    ['1156'] = 	{'RESTORE WATER ZONE', '1'},
-    ['1157'] = 	{'COMMUNICATION FAIL RESTORE', '0'},
-    ['1158'] = 	{'AC FAIL RESTORE', '0'},
-    ['1159'] = 	{'LOW BATTERY RESTORE', '0'},
-    ['1160'] = 	{'CONTROL OVER CURRENT RESTORE', '3'},
-    ['1161'] = 	{'EXPANSION MODULE RESTORE', '0'},
-    ['1162'] = 	{'OUTPUT2 RESTORE', '0'},
-    ['1163'] = 	{'TELEPHONE LINE RESTORE', '0'},
-    ['1164'] = 	{'ALARM MEMORY, ANY AREA', '0'},
-    ['1165'] = 	{'ALARM MEMORY, AREA 1', '0'},
-    ['1166'] = 	{'ALARM MEMORY, AREA 2', '0'},
-    ['1167'] = 	{'ALARM MEMORY, AREA 3', '0'},
-    ['1168'] = 	{'ALARM MEMORY, AREA 4', '0'},
-    ['1169'] = 	{'ALARM MEMORY, AREA 5', '0'},
-    ['1170'] = 	{'ALARM MEMORY, AREA 6', '0'},
-    ['1171'] = 	{'ALARM MEMORY, AREA 7', '0'},
-    ['1172'] = 	{'ALARM MEMORY, AREA 8', '0'},
-    ['1173'] = 	{'AREA ARMED', '2'},
-    ['1174'] = 	{'AREA DISARMED', '2'},
-    ['1175'] = 	{'AREA 1 ARM STATE', '2'},
-    ['1176'] = 	{'AREA 2 ARM STATE', '2'},
-    ['1177'] = 	{'AREA 3 ARM STATE', '2'},
-    ['1178'] = 	{'AREA 4 ARM STATE', '2'},
-    ['1179'] = 	{'AREA 5 ARM STATE', '2'},
-    ['1180'] = 	{'AREA 6 ARM STATE', '2'},
-    ['1181'] = 	{'AREA 7 ARM STATE', '2'},
-    ['1182'] = 	{'AREA 8 ARM STATE', '2'},
-    ['1183'] = 	{'AREA 1 IS ARMED AWAY', '2'},
-    ['1184'] = 	{'AREA 2 IS ARMED AWAY', '2'},
-    ['1185'] = 	{'AREA 3 IS ARMED AWAY', '2'},
-    ['1186'] = 	{'AREA 4 IS ARMED AWAY', '2'},
-    ['1187'] = 	{'AREA 5 IS ARMED AWAY', '2'},
-    ['1188'] = 	{'AREA 6 IS ARMED AWAY', '2'},
-    ['1189'] = 	{'AREA 7 IS ARMED AWAY', '2'},
-    ['1190'] = 	{'AREA 8 IS ARMED AWAY', '2'},
-    ['1191'] = 	{'AREA 1 IS ARMED STAY', '2'},
-    ['1192'] = 	{'AREA 2 IS ARMED STAY', '2'},
-    ['1193'] = 	{'AREA 3 IS ARMED STAY', '2'},
-    ['1194'] = 	{'AREA 4 IS ARMED STAY', '2'},
-    ['1195'] = 	{'AREA 5 IS ARMED STAY', '2'},
-    ['1196'] = 	{'AREA 6 IS ARMED STAY', '2'},
-    ['1197'] = 	{'AREA 7 IS ARMED STAY', '2'},
-    ['1198'] = 	{'AREA 8 IS ARMED STAY', '2'},
-    ['1199'] = 	{'AREA 1 IS ARMED STAY INSTANT', '2'},
-    ['1200'] = 	{'AREA 2 IS ARMED STAY INSTANT', '2'},
-    ['1201'] = 	{'AREA 3 IS ARMED STAY INSTANT', '2'},
-    ['1202'] = 	{'AREA 4 IS ARMED STAY INSTANT', '2'},
-    ['1203'] = 	{'AREA 5 IS ARMED STAY INSTANT', '2'},
-    ['1204'] = 	{'AREA 6 IS ARMED STAY INSTANT', '2'},
-    ['1205'] = 	{'AREA 7 IS ARMED STAY INSTANT', '2'},
-    ['1206'] = 	{'AREA 8 IS ARMED STAY INSTANT', '2'},
-    ['1207'] = 	{'AREA 1 IS ARMED NIGHT', '2'},
-    ['1208'] = 	{'AREA 2 IS ARMED NIGHT', '2'},
-    ['1209'] = 	{'AREA 3 IS ARMED NIGHT', '2'},
-    ['1210'] = 	{'AREA 4 IS ARMED NIGHT', '2'},
-    ['1211'] = 	{'AREA 5 IS ARMED NIGHT', '2'},
-    ['1212'] = 	{'AREA 6 IS ARMED NIGHT', '2'},
-    ['1213'] = 	{'AREA 7 IS ARMED NIGHT', '2'},
-    ['1214'] = 	{'AREA 8 IS ARMED NIGHT', '2'},
-    ['1215'] = 	{'AREA 1 IS ARMED NIGHT INSTANT', '2'},
-    ['1216'] = 	{'AREA 2 IS ARMED NIGHT INSTANT', '2'},
-    ['1217'] = 	{'AREA 3 IS ARMED NIGHT INSTANT', '2'},
-    ['1218'] = 	{'AREA 4 IS ARMED NIGHT INSTANT', '2'},
-    ['1219'] = 	{'AREA 5 IS ARMED NIGHT INSTANT', '2'},
-    ['1220'] = 	{'AREA 6 IS ARMED NIGHT INSTANT', '2'},
-    ['1221'] = 	{'AREA 7 IS ARMED NIGHT INSTANT', '2'},
-    ['1222'] = 	{'AREA 8 IS ARMED NIGHT INSTANT', '2'},
-    ['1223'] = 	{'AREA 1 IS ARMED VACATION', '2'},
-    ['1224'] = 	{'AREA 2 IS ARMED VACATION', '2'},
-    ['1225'] = 	{'AREA 3 IS ARMED VACATION', '2'},
-    ['1226'] = 	{'AREA 4 IS ARMED VACATION', '2'},
-    ['1227'] = 	{'AREA 5 IS ARMED VACATION', '2'},
-    ['1228'] = 	{'AREA 6 IS ARMED VACATION', '2'},
-    ['1229'] = 	{'AREA 7 IS ARMED VACATION', '2'},
-    ['1230'] = 	{'AREA 8 IS ARMED VACATION', '2'},
-    ['1231'] = 	{'AREA 1 IS FORCE ARMED', '2'},
-    ['1232'] = 	{'AREA 2 IS FORCE ARMED', '2'},
-    ['1233'] = 	{'AREA 3 IS FORCE ARMED', '2'},
-    ['1234'] = 	{'AREA 4 IS FORCE ARMED', '2'},
-    ['1235'] = 	{'AREA 5 IS FORCE ARMED', '2'},
-    ['1236'] = 	{'AREA 6 IS FORCE ARMED', '2'},
-    ['1237'] = 	{'AREA 7 IS FORCE ARMED', '2'},
-    ['1238'] = 	{'AREA 8 IS FORCE ARMED', '2'},
-    ['1239'] = 	{'ZONE BYPASSED', '1'},
-    ['1240'] = 	{'ZONE UNBYPASSED', '1'},
-    ['1241'] = 	{'ANY BURGLAR ZONE IS FAULTED', '0'},
-    ['1242'] = 	{'BURGLAR STATUS OF ALL AREAS', '0'},
-    ['1243'] = 	{'AREA 1 BURGLAR STATUS', '0'},
-    ['1244'] = 	{'AREA 2 BURGLAR STATUS', '0'},
-    ['1245'] = 	{'AREA 3 BURGLAR STATUS', '0'},
-    ['1246'] = 	{'AREA 4 BURGLAR STATUS', '0'},
-    ['1247'] = 	{'AREA 5 BURGLAR STATUS', '0'},
-    ['1248'] = 	{'AREA 6 BURGLAR STATUS', '0'},
-    ['1249'] = 	{'AREA 7 BURGLAR STATUS', '0'},
-    ['1250'] = 	{'AREA 8 BURGLAR STATUS', '0'},
-    ['1251'] = 	{'AREA 1 CHIME MODE', '0'},
-    ['1252'] = 	{'AREA 2 CHIME MODE', '0'},
-    ['1253'] = 	{'AREA 3 CHIME MODE', '0'},
-    ['1254'] = 	{'AREA 4 CHIME MODE', '0'},
-    ['1255'] = 	{'AREA 5 CHIME MODE', '0'},
-    ['1256'] = 	{'AREA 6 CHIME MODE', '0'},
-    ['1257'] = 	{'AREA 7 CHIME MODE', '0'},
-    ['1258'] = 	{'AREA 8 CHIME MODE', '0'},
-    ['1259'] = 	{'AREA 1 CHIME ALERT', '0'},
-    ['1260'] = 	{'AREA 2 CHIME ALERT', '0'},
-    ['1261'] = 	{'AREA 3 CHIME ALERT', '0'},
-    ['1262'] = 	{'AREA 4 CHIME ALERT', '0'},
-    ['1263'] = 	{'AREA 5 CHIME ALERT', '0'},
-    ['1264'] = 	{'AREA 6 CHIME ALERT', '0'},
-    ['1265'] = 	{'AREA 7 CHIME ALERT', '0'},
-    ['1266'] = 	{'AREA 8 CHIME ALERT', '0'},
-    ['1267'] = 	{'ENTRY DELAY, ANY AREA', '0'},
-    ['1268'] = 	{'AREA 1 ENTRY DELAY', '0'},
-    ['1269'] = 	{'AREA 2 ENTRY DELAY', '0'},
-    ['1270'] = 	{'AREA 3 ENTRY DELAY', '0'},
-    ['1271'] = 	{'AREA 4 ENTRY DELAY', '0'},
-    ['1272'] = 	{'AREA 5 ENTRY DELAY', '0'},
-    ['1273'] = 	{'AREA 6 ENTRY DELAY', '0'},
-    ['1274'] = 	{'AREA 7 ENTRY DELAY', '0'},
-    ['1275'] = 	{'AREA 8 ENTRY DELAY', '0'},
-    ['1276'] = 	{'EXIT DELAY, ANY AREA', '0'},
-    ['1277'] = 	{'AREA 1 EXIT DELAY', '0'},
-    ['1278'] = 	{'AREA 2 EXIT DELAY', '0'},
-    ['1279'] = 	{'AREA 3 EXIT DELAY', '0'},
-    ['1280'] = 	{'AREA 4 EXIT DELAY', '0'},
-    ['1281'] = 	{'AREA 5 EXIT DELAY', '0'},
-    ['1282'] = 	{'AREA 6 EXIT DELAY', '0'},
-    ['1283'] = 	{'AREA 7 EXIT DELAY', '0'},
-    ['1284'] = 	{'AREA 8 EXIT DELAY', '0'},
-    ['1285'] = 	{'AREA 1 EXIT DELAY ENDS', '0'},
-    ['1286'] = 	{'AREA 2 EXIT DELAY ENDS', '0'},
-    ['1287'] = 	{'AREA 3 EXIT DELAY ENDS', '0'},
-    ['1288'] = 	{'AREA 4 EXIT DELAY ENDS', '0'},
-    ['1289'] = 	{'AREA 5 EXIT DELAY ENDS', '0'},
-    ['1290'] = 	{'AREA 6 EXIT DELAY ENDS', '0'},
-    ['1291'] = 	{'AREA 7 EXIT DELAY ENDS', '0'},
-    ['1292'] = 	{'AREA 8 EXIT DELAY ENDS', '0'},
-    ['1293'] = 	{'AUTOMATIC CLOSING', '0'},
-    ['1294'] = 	{'EARLY CLOSING', '2'},
-    ['1295'] = 	{'CLOSING TIME EXTENDED', '2'},
-    ['1296'] = 	{'FAIL TO CLOSE', '0'},
-    ['1297'] = 	{'LATE TO CLOSE', '2'},
-    ['1298'] = 	{'KEYSWITCH CLOSING', '1'},
-    ['1299'] = 	{'DURESS', '2'},
-    ['1300'] = 	{'EXCEPTION OPENING', '2'},
-    ['1301'] = 	{'EARLY OPENING', '2'},
-    ['1302'] = 	{'FAIL TO OPEN', '0'},
-    ['1303'] = 	{'LATE TO OPEN', '2'},
-    ['1304'] = 	{'KEYSWITCH OPENING', '1'},
-    ['1305'] = 	{'AREA 1 CLOSING RING BACK', '0'},
-    ['1306'] = 	{'AREA 2 CLOSING RING BACK', '0'},
-    ['1307'] = 	{'AREA 3 CLOSING RING BACK', '0'},
-    ['1308'] = 	{'AREA 4 CLOSING RING BACK', '0'},
-    ['1309'] = 	{'AREA 5 CLOSING RING BACK', '0'},
-    ['1310'] = 	{'AREA 6 CLOSING RING BACK', '0'},
-    ['1311'] = 	{'AREA 7 CLOSING RING BACK', '0'},
-    ['1312'] = 	{'AREA 8 CLOSING RING BACK', '0'},
-    ['1313'] = 	{'ACCESS KEYPAD 01', '2'},
-    ['1314'] = 	{'ACCESS KEYPAD 02', '2'},
-    ['1315'] = 	{'ACCESS KEYPAD 03', '2'},
-    ['1316'] = 	{'ACCESS KEYPAD 04', '2'},
-    ['1317'] = 	{'ACCESS KEYPAD 05', '2'},
-    ['1318'] = 	{'ACCESS KEYPAD 06', '2'},
-    ['1319'] = 	{'ACCESS KEYPAD 07', '2'},
-    ['1320'] = 	{'ACCESS KEYPAD 08', '2'},
-    ['1321'] = 	{'ACCESS KEYPAD 09', '2'},
-    ['1322'] = 	{'ACCESS KEYPAD 10', '2'},
-    ['1323'] = 	{'ACCESS KEYPAD 11', '2'},
-    ['1324'] = 	{'ACCESS KEYPAD 12', '2'},
-    ['1325'] = 	{'ACCESS KEYPAD 13', '2'},
-    ['1326'] = 	{'ACCESS KEYPAD 14', '2'},
-    ['1327'] = 	{'ACCESS KEYPAD 15', '2'},
-    ['1328'] = 	{'ACCESS KEYPAD 16', '2'},
-    ['1329'] = 	{'ACCESS ANY KEYPAD', '2'},
-    ['1330'] = 	{'BEEP AREA 1 KEYPAD(S)', '0'},
-    ['1331'] = 	{'BEEP AREA 2 KEYPAD(S)', '0'},
-    ['1332'] = 	{'BEEP AREA 3 KEYPAD(S)', '0'},
-    ['1333'] = 	{'BEEP AREA 4 KEYPAD(S)', '0'},
-    ['1334'] = 	{'BEEP AREA 5 KEYPAD(S)', '0'},
-    ['1335'] = 	{'BEEP AREA 6 KEYPAD(S)', '0'},
-    ['1336'] = 	{'BEEP AREA 7 KEYPAD(S)', '0'},
-    ['1337'] = 	{'BEEP AREA 8 KEYPAD(S)', '0'},
-    ['1338'] = 	{'AREA 1 EXIT ERROR', '0'},
-    ['1339'] = 	{'AREA 2 EXIT ERROR', '0'},
-    ['1340'] = 	{'AREA 3 EXIT ERROR', '0'},
-    ['1341'] = 	{'AREA 4 EXIT ERROR', '0'},
-    ['1342'] = 	{'AREA 5 EXIT ERROR', '0'},
-    ['1343'] = 	{'AREA 6 EXIT ERROR', '0'},
-    ['1344'] = 	{'AREA 7 EXIT ERROR', '0'},
-    ['1345'] = 	{'AREA 8 EXIT ERROR', '0'},
-    ['1346'] = 	{'AUDIO AMPLIFIER STATUS', '0'},
-    ['1347'] = 	{'CONTROL POWER STATUS', '0'},
-    ['1348'] = 	{'LIGHT', '0'},
-    ['1349'] = 	{'DARK', '0'},
-    ['1350'] = 	{'SECURITY (DAY) ALERT', '1'},
-    ['1351'] = 	{'DIALER ABORT', '2'},
-    ['1352'] = 	{'DIALER CANCEL', '2'},
-    ['1353'] = 	{'DIALER AUTO TEST', '0'},
-    ['1354'] = 	{'LOCAL PROGRAMMING', '0'},
-    ['1355'] = 	{'LOCAL PROGRAMMING ENDS', '0'},
-    ['1356'] = 	{'KEYSWITCH ZN TAMPER ALERT', '1'},
-    ['1357'] = 	{'EVENT LOG, 80% FULL', '0'},
-    ['1358'] = 	{'TELEPHONE LINE IS RINGING', '0'},
-    ['1359'] = 	{'TELEPHONE LINE SEIZE', '0'},
-    ['1360'] = 	{'TELEPHONE LINE OFF/ON HOOK', '0'},
-    ['1361'] = 	{'TELEPHONE LOCAL ACCESS', '0'},
-    ['1362'] = 	{'TELEPHONE REMOTE ACCESS', '0'},
-    ['1363'] = 	{'REMOTE PROGRAMMING', '0'},
-    ['1364'] = 	{'REMOTE PROGRAMMING ENDS', '0'},
-    ['1365'] = 	{'AC FAIL TBL - POWER SUPV ZN', '1'},
-    ['1366'] = 	{'LOW BATTERY TBL - POWER SUPV ZN', '1'},
-    ['1367'] = 	{'SYSTEM START UP', '3'},
-    ['1368'] = 	{'CONTROL LOW VOLTAGE SHUTDOWN', '0'},
-    ['1369'] = 	{'RF KEYFOB BUTTON 1', '0'},
-    ['1370'] = 	{'RF KEYFOB BUTTON 2', '0'},
-    ['1371'] = 	{'RF KEYFOB BUTTON 3', '0'},
-    ['1372'] = 	{'RF KEYFOB BUTTON 4', '0'},
-    ['1373'] = 	{'RF KEYFOB BUTTON 5', '0'},
-    ['1374'] = 	{'RF KEYFOB BUTTON 6', '0'},
-    ['1375'] = 	{'RF KEYFOB BUTTON 7', '0'},
-    ['1376'] = 	{'RF KEYFOB BUTTON 8', '0'},
-    ['1377'] = 	{'LOST SERIAL PORT EXPANDER TROUBLE', '3'},
-    ['1378'] = 	{'RULE TRIGGERED VOICE TELEPHONE DIAL', '5'},
-    ['1379'] = 	{'DIALER REPORT CLEARED', '2'},
-    ['1380'] = 	{'CENTRAL STATION KISSOFF', '0'},
-    ['1381'] = 	{'TRANSMITTER SUPERVISION LOSS', '1'},
-    ['1382'] = 	{'2-WIRE SMOKE DET. CLEAN TRBL', '1'},
-    ['1383'] = 	{'ETHERNET TROUBLE', '0'},
-    ['1384'] = 	{'ETHERNET RESTORE', '0'},
-    ['1385'] = 	{'RESTORE REMOTE AC POWER', '1'},
-    ['1386'] = 	{'RESTORE REMOTE BATTERY', '1'},
-  }
+      ['1000'] = 	{'No Event', '0'},
+      ['1001'] = 	{'FIRE ALARM', '1'},
+      ['1002'] = 	{'FIRE SUPERVISORY ALARM', '1'},
+      ['1003'] = 	{'BURGLAR ALARM, ANY AREA', '1'},
+      ['1004'] = 	{'MEDICAL ALARM, ANY AREA', '1'},
+      ['1005'] = 	{'POLICE ALARM, ANY AREA', '1'},
+      ['1006'] = 	{'AUX1 24 HR, ANY AREA', '1'},
+      ['1007'] = 	{'AUX2 24 HR, ANY AREA', '1'},
+      ['1008'] = 	{'CARBON MONOXIDE ALARM, ANY AREA', '1'},
+      ['1009'] = 	{'EMERGENCY ALARM, ANY AREA', '1'},
+      ['1010'] = 	{'FREEZE ALARM, ANY AREA', '1'},
+      ['1011'] = 	{'GAS ALARM, ANY AREA', '1'},
+      ['1012'] = 	{'HEAT ALARM, ANY AREA', '1'},
+      ['1013'] = 	{'WATER ALARM, ANY AREA', '1'},
+      ['1014'] = 	{'ALARM, ANY AREA', '1'},
+      ['1015'] = 	{'BURGLAR ALARM IN AREA 1', '1'},
+      ['1016'] = 	{'BURGLAR ALARM IN AREA 2', '1'},
+      ['1017'] = 	{'BURGLAR ALARM IN AREA 3', '1'},
+      ['1018'] = 	{'BURGLAR ALARM IN AREA 4', '1'},
+      ['1019'] = 	{'BURGLAR ALARM IN AREA 5', '1'},
+      ['1020'] = 	{'BURGLAR ALARM IN AREA 6', '1'},
+      ['1021'] = 	{'BURGLAR ALARM IN AREA 7', '1'},
+      ['1022'] = 	{'BURGLAR ALARM IN AREA 8', '1'},
+      ['1023'] = 	{'MEDICAL ALARM IN AREA 1', '1'},
+      ['1024'] = 	{'MEDICAL ALARM IN AREA 2', '1'},
+      ['1025'] = 	{'MEDICAL ALARM IN AREA 3', '1'},
+      ['1026'] = 	{'MEDICAL ALARM IN AREA 4', '1'},
+      ['1027'] = 	{'MEDICAL ALARM IN AREA 5', '1'},
+      ['1028'] = 	{'MEDICAL ALARM IN AREA 6', '1'},
+      ['1029'] = 	{'MEDICAL ALARM IN AREA 7', '1'},
+      ['1030'] = 	{'MEDICAL ALARM IN AREA 8', '1'},
+      ['1031'] = 	{'POLICE ALARM IN AREA 1', '1'},
+      ['1032'] = 	{'POLICE ALARM IN AREA 2', '1'},
+      ['1033'] = 	{'POLICE ALARM IN AREA 3', '1'},
+      ['1034'] = 	{'POLICE ALARM IN AREA 4', '1'},
+      ['1035'] = 	{'POLICE ALARM IN AREA 5', '1'},
+      ['1036'] = 	{'POLICE ALARM IN AREA 6', '1'},
+      ['1037'] = 	{'POLICE ALARM IN AREA 7', '1'},
+      ['1038'] = 	{'POLICE ALARM IN AREA 8', '1'},
+      ['1039'] = 	{'AUX1 24 HR IN AREA 1', '1'},
+      ['1040'] = 	{'AUX1 24 HR IN AREA 2', '1'},
+      ['1041'] = 	{'AUX1 24 HR IN AREA 3', '1'},
+      ['1042'] = 	{'AUX1 24 HR IN AREA 4', '1'},
+      ['1043'] = 	{'AUX1 24 HR IN AREA 5', '1'},
+      ['1044'] = 	{'AUX1 24 HR IN AREA 6', '1'},
+      ['1045'] = 	{'AUX1 24 HR IN AREA 7', '1'},
+      ['1046'] = 	{'AUX1 24 HR IN AREA 8', '1'},
+      ['1047'] = 	{'AUX2 24 HR IN AREA 1', '1'},
+      ['1048'] = 	{'AUX2 24 HR IN AREA 2', '1'},
+      ['1049'] = 	{'AUX2 24 HR IN AREA 3', '1'},
+      ['1050'] = 	{'AUX2 24 HR IN AREA 4', '1'},
+      ['1051'] = 	{'AUX2 24 HR IN AREA 5', '1'},
+      ['1052'] = 	{'AUX2 24 HR IN AREA 6', '1'},
+      ['1053'] = 	{'AUX2 24 HR IN AREA 7', '1'},
+      ['1054'] = 	{'AUX2 24 HR IN AREA 8', '1'},
+      ['1055'] = 	{'CO ALARM IN AREA 1', '1'},
+      ['1056'] = 	{'CO ALARM IN AREA 2', '1'},
+      ['1057'] = 	{'CO ALARM IN AREA 3', '1'},
+      ['1058'] = 	{'CO ALARM IN AREA 4', '1'},
+      ['1059'] = 	{'CO ALARM IN AREA 5', '1'},
+      ['1060'] = 	{'CO ALARM IN AREA 6', '1'},
+      ['1061'] = 	{'CO ALARM IN AREA 7', '1'},
+      ['1062'] = 	{'CO ALARM IN AREA 8', '1'},
+      ['1063'] = 	{'EMERGENCY ALARM IN AREA 1', '1'},
+      ['1064'] = 	{'EMERGENCY ALARM IN AREA 2', '1'},
+      ['1065'] = 	{'EMERGENCY ALARM IN AREA 3', '1'},
+      ['1066'] = 	{'EMERGENCY ALARM IN AREA 4', '1'},
+      ['1067'] = 	{'EMERGENCY ALARM IN AREA 5', '1'},
+      ['1068'] = 	{'EMERGENCY ALARM IN AREA 6', '1'},
+      ['1069'] = 	{'EMERGENCY ALARM IN AREA 7', '1'},
+      ['1070'] = 	{'EMERGENCY ALARM IN AREA 8', '1'},
+      ['1071'] = 	{'FREEZE ALARM IN AREA 1', '1'},
+      ['1072'] = 	{'FREEZE ALARM IN AREA 2', '1'},
+      ['1073'] = 	{'FREEZE ALARM IN AREA 3', '1'},
+      ['1074'] = 	{'FREEZE ALARM IN AREA 4', '1'},
+      ['1075'] = 	{'FREEZE ALARM IN AREA 5', '1'},
+      ['1076'] = 	{'FREEZE ALARM IN AREA 6', '1'},
+      ['1077'] = 	{'FREEZE ALARM IN AREA 7', '1'},
+      ['1078'] = 	{'FREEZE ALARM IN AREA 8', '1'},
+      ['1079'] = 	{'GAS ALARM IN AREA 1', '1'},
+      ['1080'] = 	{'GAS ALARM IN AREA 2', '1'},
+      ['1081'] = 	{'GAS ALARM IN AREA 3', '1'},
+      ['1082'] = 	{'GAS ALARM IN AREA 4', '1'},
+      ['1083'] = 	{'GAS ALARM IN AREA 5', '1'},
+      ['1084'] = 	{'GAS ALARM IN AREA 6', '1'},
+      ['1085'] = 	{'GAS ALARM IN AREA 7', '1'},
+      ['1086'] = 	{'GAS ALARM IN AREA 8', '1'},
+      ['1087'] = 	{'HEAT ALARM IN AREA 1', '1'},
+      ['1088'] = 	{'HEAT ALARM IN AREA 2', '1'},
+      ['1089'] = 	{'HEAT ALARM IN AREA 3', '1'},
+      ['1090'] = 	{'HEAT ALARM IN AREA 4', '1'},
+      ['1091'] = 	{'HEAT ALARM IN AREA 5', '1'},
+      ['1092'] = 	{'HEAT ALARM IN AREA 6', '1'},
+      ['1093'] = 	{'HEAT ALARM IN AREA 7', '1'},
+      ['1094'] = 	{'HEAT ALARM IN AREA 8', '1'},
+      ['1095'] = 	{'WATER ALARM IN AREA 1', '1'},
+      ['1096'] = 	{'WATER ALARM IN AREA 2', '1'},
+      ['1097'] = 	{'WATER ALARM IN AREA 3', '1'},
+      ['1098'] = 	{'WATER ALARM IN AREA 4', '1'},
+      ['1099'] = 	{'WATER ALARM IN AREA 5', '1'},
+      ['1100'] = 	{'WATER ALARM IN AREA 6', '1'},
+      ['1101'] = 	{'WATER ALARM IN AREA 7', '1'},
+      ['1102'] = 	{'WATER ALARM IN AREA 8', '1'},
+      ['1103'] = 	{'ANY ALARM IN AREA 1', '1'},
+      ['1104'] = 	{'ANY ALARM IN AREA 2', '1'},
+      ['1105'] = 	{'ANY ALARM IN AREA 3', '1'},
+      ['1106'] = 	{'ANY ALARM IN AREA 4', '1'},
+      ['1107'] = 	{'ANY ALARM IN AREA 5', '1'},
+      ['1108'] = 	{'ANY ALARM IN AREA 6', '1'},
+      ['1109'] = 	{'ANY ALARM IN AREA 7', '1'},
+      ['1110'] = 	{'ANY ALARM IN AREA 8', '1'},
+      ['1111'] = 	{'CODE LOCKOUT, ANY KEYPAD', '0'},
+      ['1112'] = 	{'KEYPAD 01 CODE-LOCKOUT', '0'},
+      ['1113'] = 	{'KEYPAD 02 CODE-LOCKOUT', '0'},
+      ['1114'] = 	{'KEYPAD 03 CODE-LOCKOUT', '0'},
+      ['1115'] = 	{'KEYPAD 04 CODE-LOCKOUT', '0'},
+      ['1116'] = 	{'KEYPAD 05 CODE-LOCKOUT', '0'},
+      ['1117'] = 	{'KEYPAD 06 CODE-LOCKOUT', '0'},
+      ['1118'] = 	{'KEYPAD 07 CODE-LOCKOUT', '0'},
+      ['1119'] = 	{'KEYPAD 08 CODE-LOCKOUT', '0'},
+      ['1120'] = 	{'KEYPAD 09 CODE-LOCKOUT', '0'},
+      ['1121'] = 	{'KEYPAD 10 CODE-LOCKOUT', '0'},
+      ['1122'] = 	{'KEYPAD 11 CODE-LOCKOUT', '0'},
+      ['1123'] = 	{'KEYPAD 12 CODE-LOCKOUT', '0'},
+      ['1124'] = 	{'KEYPAD 13 CODE-LOCKOUT', '0'},
+      ['1125'] = 	{'KEYPAD 14 CODE-LOCKOUT', '0'},
+      ['1126'] = 	{'KEYPAD 15 CODE-LOCKOUT', '0'},
+      ['1127'] = 	{'KEYPAD 16 CODE-LOCKOUT', '0'},
+      ['1128'] = 	{'FIRE TROUBLE, ANY ZONE', '1'},
+      ['1129'] = 	{'BURGLAR TROUBLE, ANY ZONE', '1'},
+      ['1130'] = 	{'FAIL TO COMMUNICATE TROUBLE', '0'},
+      ['1131'] = 	{'RF SENSOR LOW BATTERY TROUBLE', '1'},
+      ['1132'] = 	{'LOST ANC MODULE TROUBLE', '3'},
+      ['1133'] = 	{'LOST KEYPAD TROUBLE', '3'},
+      ['1134'] = 	{'LOST INPUT EXPANDER TROUBLE', '3'},
+      ['1135'] = 	{'LOST OUTPUT EXPANDER TROUBLE', '3'},
+      ['1136'] = 	{'EEPROM MEMORY ERROR TROUBLE', '4'},
+      ['1137'] = 	{'FLASH MEMORY ERROR TROUBLE', '0'},
+      ['1138'] = 	{'AC FAILURE TROUBLE', '0'},
+      ['1139'] = 	{'CONTROL LOW BATTERY TROUBLE', '0'},
+      ['1140'] = 	{'CONTROL OVER CURRENT TROUBLE', '0'},
+      ['1141'] = 	{'EXPANSION MODULE TROUBLE', '3'},
+      ['1142'] = 	{'OUTPUT 2 SUPERVISORY TROUBLE', '0'},
+      ['1143'] = 	{'TELEPHONE LINE FAULT TROUBLE1', '0'},
+      ['1144'] = 	{'RESTORE FIRE ZONE', '1'},
+      ['1145'] = 	{'RESTORE FIRE SUPERVISORY ZONE', '1'},
+      ['1146'] = 	{'RESTORE BURGLAR ZONE', '1'},
+      ['1147'] = 	{'RESTORE MEDICAL ZONE', '1'},
+      ['1148'] = 	{'RESTORE POLICE ZONE', '1'},
+      ['1149'] = 	{'RESTORE AUX1 24 HR ZONE', '1'},
+      ['1150'] = 	{'RESTORE AUX2 24 HR ZONE', '1'},
+      ['1151'] = 	{'RESTORE CO ZONE', '1'},
+      ['1152'] = 	{'RESTORE EMERGENCY ZONE', '1'},
+      ['1153'] = 	{'RESTORE FREEZE ZONE', '1'},
+      ['1154'] = 	{'RESTORE GAS ZONE', '1'},
+      ['1155'] = 	{'RESTORE HEAT ZONE', '1'},
+      ['1156'] = 	{'RESTORE WATER ZONE', '1'},
+      ['1157'] = 	{'COMMUNICATION FAIL RESTORE', '0'},
+      ['1158'] = 	{'AC FAIL RESTORE', '0'},
+      ['1159'] = 	{'LOW BATTERY RESTORE', '0'},
+      ['1160'] = 	{'CONTROL OVER CURRENT RESTORE', '3'},
+      ['1161'] = 	{'EXPANSION MODULE RESTORE', '0'},
+      ['1162'] = 	{'OUTPUT2 RESTORE', '0'},
+      ['1163'] = 	{'TELEPHONE LINE RESTORE', '0'},
+      ['1164'] = 	{'ALARM MEMORY, ANY AREA', '0'},
+      ['1165'] = 	{'ALARM MEMORY, AREA 1', '0'},
+      ['1166'] = 	{'ALARM MEMORY, AREA 2', '0'},
+      ['1167'] = 	{'ALARM MEMORY, AREA 3', '0'},
+      ['1168'] = 	{'ALARM MEMORY, AREA 4', '0'},
+      ['1169'] = 	{'ALARM MEMORY, AREA 5', '0'},
+      ['1170'] = 	{'ALARM MEMORY, AREA 6', '0'},
+      ['1171'] = 	{'ALARM MEMORY, AREA 7', '0'},
+      ['1172'] = 	{'ALARM MEMORY, AREA 8', '0'},
+      ['1173'] = 	{'AREA ARMED', '2'},
+      ['1174'] = 	{'AREA DISARMED', '2'},
+      ['1175'] = 	{'AREA 1 ARM STATE', '2'},
+      ['1176'] = 	{'AREA 2 ARM STATE', '2'},
+      ['1177'] = 	{'AREA 3 ARM STATE', '2'},
+      ['1178'] = 	{'AREA 4 ARM STATE', '2'},
+      ['1179'] = 	{'AREA 5 ARM STATE', '2'},
+      ['1180'] = 	{'AREA 6 ARM STATE', '2'},
+      ['1181'] = 	{'AREA 7 ARM STATE', '2'},
+      ['1182'] = 	{'AREA 8 ARM STATE', '2'},
+      ['1183'] = 	{'AREA 1 IS ARMED AWAY', '2'},
+      ['1184'] = 	{'AREA 2 IS ARMED AWAY', '2'},
+      ['1185'] = 	{'AREA 3 IS ARMED AWAY', '2'},
+      ['1186'] = 	{'AREA 4 IS ARMED AWAY', '2'},
+      ['1187'] = 	{'AREA 5 IS ARMED AWAY', '2'},
+      ['1188'] = 	{'AREA 6 IS ARMED AWAY', '2'},
+      ['1189'] = 	{'AREA 7 IS ARMED AWAY', '2'},
+      ['1190'] = 	{'AREA 8 IS ARMED AWAY', '2'},
+      ['1191'] = 	{'AREA 1 IS ARMED STAY', '2'},
+      ['1192'] = 	{'AREA 2 IS ARMED STAY', '2'},
+      ['1193'] = 	{'AREA 3 IS ARMED STAY', '2'},
+      ['1194'] = 	{'AREA 4 IS ARMED STAY', '2'},
+      ['1195'] = 	{'AREA 5 IS ARMED STAY', '2'},
+      ['1196'] = 	{'AREA 6 IS ARMED STAY', '2'},
+      ['1197'] = 	{'AREA 7 IS ARMED STAY', '2'},
+      ['1198'] = 	{'AREA 8 IS ARMED STAY', '2'},
+      ['1199'] = 	{'AREA 1 IS ARMED STAY INSTANT', '2'},
+      ['1200'] = 	{'AREA 2 IS ARMED STAY INSTANT', '2'},
+      ['1201'] = 	{'AREA 3 IS ARMED STAY INSTANT', '2'},
+      ['1202'] = 	{'AREA 4 IS ARMED STAY INSTANT', '2'},
+      ['1203'] = 	{'AREA 5 IS ARMED STAY INSTANT', '2'},
+      ['1204'] = 	{'AREA 6 IS ARMED STAY INSTANT', '2'},
+      ['1205'] = 	{'AREA 7 IS ARMED STAY INSTANT', '2'},
+      ['1206'] = 	{'AREA 8 IS ARMED STAY INSTANT', '2'},
+      ['1207'] = 	{'AREA 1 IS ARMED NIGHT', '2'},
+      ['1208'] = 	{'AREA 2 IS ARMED NIGHT', '2'},
+      ['1209'] = 	{'AREA 3 IS ARMED NIGHT', '2'},
+      ['1210'] = 	{'AREA 4 IS ARMED NIGHT', '2'},
+      ['1211'] = 	{'AREA 5 IS ARMED NIGHT', '2'},
+      ['1212'] = 	{'AREA 6 IS ARMED NIGHT', '2'},
+      ['1213'] = 	{'AREA 7 IS ARMED NIGHT', '2'},
+      ['1214'] = 	{'AREA 8 IS ARMED NIGHT', '2'},
+      ['1215'] = 	{'AREA 1 IS ARMED NIGHT INSTANT', '2'},
+      ['1216'] = 	{'AREA 2 IS ARMED NIGHT INSTANT', '2'},
+      ['1217'] = 	{'AREA 3 IS ARMED NIGHT INSTANT', '2'},
+      ['1218'] = 	{'AREA 4 IS ARMED NIGHT INSTANT', '2'},
+      ['1219'] = 	{'AREA 5 IS ARMED NIGHT INSTANT', '2'},
+      ['1220'] = 	{'AREA 6 IS ARMED NIGHT INSTANT', '2'},
+      ['1221'] = 	{'AREA 7 IS ARMED NIGHT INSTANT', '2'},
+      ['1222'] = 	{'AREA 8 IS ARMED NIGHT INSTANT', '2'},
+      ['1223'] = 	{'AREA 1 IS ARMED VACATION', '2'},
+      ['1224'] = 	{'AREA 2 IS ARMED VACATION', '2'},
+      ['1225'] = 	{'AREA 3 IS ARMED VACATION', '2'},
+      ['1226'] = 	{'AREA 4 IS ARMED VACATION', '2'},
+      ['1227'] = 	{'AREA 5 IS ARMED VACATION', '2'},
+      ['1228'] = 	{'AREA 6 IS ARMED VACATION', '2'},
+      ['1229'] = 	{'AREA 7 IS ARMED VACATION', '2'},
+      ['1230'] = 	{'AREA 8 IS ARMED VACATION', '2'},
+      ['1231'] = 	{'AREA 1 IS FORCE ARMED', '2'},
+      ['1232'] = 	{'AREA 2 IS FORCE ARMED', '2'},
+      ['1233'] = 	{'AREA 3 IS FORCE ARMED', '2'},
+      ['1234'] = 	{'AREA 4 IS FORCE ARMED', '2'},
+      ['1235'] = 	{'AREA 5 IS FORCE ARMED', '2'},
+      ['1236'] = 	{'AREA 6 IS FORCE ARMED', '2'},
+      ['1237'] = 	{'AREA 7 IS FORCE ARMED', '2'},
+      ['1238'] = 	{'AREA 8 IS FORCE ARMED', '2'},
+      ['1239'] = 	{'ZONE BYPASSED', '1'},
+      ['1240'] = 	{'ZONE UNBYPASSED', '1'},
+      ['1241'] = 	{'ANY BURGLAR ZONE IS FAULTED', '0'},
+      ['1242'] = 	{'BURGLAR STATUS OF ALL AREAS', '0'},
+      ['1243'] = 	{'AREA 1 BURGLAR STATUS', '0'},
+      ['1244'] = 	{'AREA 2 BURGLAR STATUS', '0'},
+      ['1245'] = 	{'AREA 3 BURGLAR STATUS', '0'},
+      ['1246'] = 	{'AREA 4 BURGLAR STATUS', '0'},
+      ['1247'] = 	{'AREA 5 BURGLAR STATUS', '0'},
+      ['1248'] = 	{'AREA 6 BURGLAR STATUS', '0'},
+      ['1249'] = 	{'AREA 7 BURGLAR STATUS', '0'},
+      ['1250'] = 	{'AREA 8 BURGLAR STATUS', '0'},
+      ['1251'] = 	{'AREA 1 CHIME MODE', '0'},
+      ['1252'] = 	{'AREA 2 CHIME MODE', '0'},
+      ['1253'] = 	{'AREA 3 CHIME MODE', '0'},
+      ['1254'] = 	{'AREA 4 CHIME MODE', '0'},
+      ['1255'] = 	{'AREA 5 CHIME MODE', '0'},
+      ['1256'] = 	{'AREA 6 CHIME MODE', '0'},
+      ['1257'] = 	{'AREA 7 CHIME MODE', '0'},
+      ['1258'] = 	{'AREA 8 CHIME MODE', '0'},
+      ['1259'] = 	{'AREA 1 CHIME ALERT', '0'},
+      ['1260'] = 	{'AREA 2 CHIME ALERT', '0'},
+      ['1261'] = 	{'AREA 3 CHIME ALERT', '0'},
+      ['1262'] = 	{'AREA 4 CHIME ALERT', '0'},
+      ['1263'] = 	{'AREA 5 CHIME ALERT', '0'},
+      ['1264'] = 	{'AREA 6 CHIME ALERT', '0'},
+      ['1265'] = 	{'AREA 7 CHIME ALERT', '0'},
+      ['1266'] = 	{'AREA 8 CHIME ALERT', '0'},
+      ['1267'] = 	{'ENTRY DELAY, ANY AREA', '0'},
+      ['1268'] = 	{'AREA 1 ENTRY DELAY', '0'},
+      ['1269'] = 	{'AREA 2 ENTRY DELAY', '0'},
+      ['1270'] = 	{'AREA 3 ENTRY DELAY', '0'},
+      ['1271'] = 	{'AREA 4 ENTRY DELAY', '0'},
+      ['1272'] = 	{'AREA 5 ENTRY DELAY', '0'},
+      ['1273'] = 	{'AREA 6 ENTRY DELAY', '0'},
+      ['1274'] = 	{'AREA 7 ENTRY DELAY', '0'},
+      ['1275'] = 	{'AREA 8 ENTRY DELAY', '0'},
+      ['1276'] = 	{'EXIT DELAY, ANY AREA', '0'},
+      ['1277'] = 	{'AREA 1 EXIT DELAY', '0'},
+      ['1278'] = 	{'AREA 2 EXIT DELAY', '0'},
+      ['1279'] = 	{'AREA 3 EXIT DELAY', '0'},
+      ['1280'] = 	{'AREA 4 EXIT DELAY', '0'},
+      ['1281'] = 	{'AREA 5 EXIT DELAY', '0'},
+      ['1282'] = 	{'AREA 6 EXIT DELAY', '0'},
+      ['1283'] = 	{'AREA 7 EXIT DELAY', '0'},
+      ['1284'] = 	{'AREA 8 EXIT DELAY', '0'},
+      ['1285'] = 	{'AREA 1 EXIT DELAY ENDS', '0'},
+      ['1286'] = 	{'AREA 2 EXIT DELAY ENDS', '0'},
+      ['1287'] = 	{'AREA 3 EXIT DELAY ENDS', '0'},
+      ['1288'] = 	{'AREA 4 EXIT DELAY ENDS', '0'},
+      ['1289'] = 	{'AREA 5 EXIT DELAY ENDS', '0'},
+      ['1290'] = 	{'AREA 6 EXIT DELAY ENDS', '0'},
+      ['1291'] = 	{'AREA 7 EXIT DELAY ENDS', '0'},
+      ['1292'] = 	{'AREA 8 EXIT DELAY ENDS', '0'},
+      ['1293'] = 	{'AUTOMATIC CLOSING', '0'},
+      ['1294'] = 	{'EARLY CLOSING', '2'},
+      ['1295'] = 	{'CLOSING TIME EXTENDED', '2'},
+      ['1296'] = 	{'FAIL TO CLOSE', '0'},
+      ['1297'] = 	{'LATE TO CLOSE', '2'},
+      ['1298'] = 	{'KEYSWITCH CLOSING', '1'},
+      ['1299'] = 	{'DURESS', '2'},
+      ['1300'] = 	{'EXCEPTION OPENING', '2'},
+      ['1301'] = 	{'EARLY OPENING', '2'},
+      ['1302'] = 	{'FAIL TO OPEN', '0'},
+      ['1303'] = 	{'LATE TO OPEN', '2'},
+      ['1304'] = 	{'KEYSWITCH OPENING', '1'},
+      ['1305'] = 	{'AREA 1 CLOSING RING BACK', '0'},
+      ['1306'] = 	{'AREA 2 CLOSING RING BACK', '0'},
+      ['1307'] = 	{'AREA 3 CLOSING RING BACK', '0'},
+      ['1308'] = 	{'AREA 4 CLOSING RING BACK', '0'},
+      ['1309'] = 	{'AREA 5 CLOSING RING BACK', '0'},
+      ['1310'] = 	{'AREA 6 CLOSING RING BACK', '0'},
+      ['1311'] = 	{'AREA 7 CLOSING RING BACK', '0'},
+      ['1312'] = 	{'AREA 8 CLOSING RING BACK', '0'},
+      ['1313'] = 	{'ACCESS KEYPAD 01', '2'},
+      ['1314'] = 	{'ACCESS KEYPAD 02', '2'},
+      ['1315'] = 	{'ACCESS KEYPAD 03', '2'},
+      ['1316'] = 	{'ACCESS KEYPAD 04', '2'},
+      ['1317'] = 	{'ACCESS KEYPAD 05', '2'},
+      ['1318'] = 	{'ACCESS KEYPAD 06', '2'},
+      ['1319'] = 	{'ACCESS KEYPAD 07', '2'},
+      ['1320'] = 	{'ACCESS KEYPAD 08', '2'},
+      ['1321'] = 	{'ACCESS KEYPAD 09', '2'},
+      ['1322'] = 	{'ACCESS KEYPAD 10', '2'},
+      ['1323'] = 	{'ACCESS KEYPAD 11', '2'},
+      ['1324'] = 	{'ACCESS KEYPAD 12', '2'},
+      ['1325'] = 	{'ACCESS KEYPAD 13', '2'},
+      ['1326'] = 	{'ACCESS KEYPAD 14', '2'},
+      ['1327'] = 	{'ACCESS KEYPAD 15', '2'},
+      ['1328'] = 	{'ACCESS KEYPAD 16', '2'},
+      ['1329'] = 	{'ACCESS ANY KEYPAD', '2'},
+      ['1330'] = 	{'BEEP AREA 1 KEYPAD(S)', '0'},
+      ['1331'] = 	{'BEEP AREA 2 KEYPAD(S)', '0'},
+      ['1332'] = 	{'BEEP AREA 3 KEYPAD(S)', '0'},
+      ['1333'] = 	{'BEEP AREA 4 KEYPAD(S)', '0'},
+      ['1334'] = 	{'BEEP AREA 5 KEYPAD(S)', '0'},
+      ['1335'] = 	{'BEEP AREA 6 KEYPAD(S)', '0'},
+      ['1336'] = 	{'BEEP AREA 7 KEYPAD(S)', '0'},
+      ['1337'] = 	{'BEEP AREA 8 KEYPAD(S)', '0'},
+      ['1338'] = 	{'AREA 1 EXIT ERROR', '0'},
+      ['1339'] = 	{'AREA 2 EXIT ERROR', '0'},
+      ['1340'] = 	{'AREA 3 EXIT ERROR', '0'},
+      ['1341'] = 	{'AREA 4 EXIT ERROR', '0'},
+      ['1342'] = 	{'AREA 5 EXIT ERROR', '0'},
+      ['1343'] = 	{'AREA 6 EXIT ERROR', '0'},
+      ['1344'] = 	{'AREA 7 EXIT ERROR', '0'},
+      ['1345'] = 	{'AREA 8 EXIT ERROR', '0'},
+      ['1346'] = 	{'AUDIO AMPLIFIER STATUS', '0'},
+      ['1347'] = 	{'CONTROL POWER STATUS', '0'},
+      ['1348'] = 	{'LIGHT', '0'},
+      ['1349'] = 	{'DARK', '0'},
+      ['1350'] = 	{'SECURITY (DAY) ALERT', '1'},
+      ['1351'] = 	{'DIALER ABORT', '2'},
+      ['1352'] = 	{'DIALER CANCEL', '2'},
+      ['1353'] = 	{'DIALER AUTO TEST', '0'},
+      ['1354'] = 	{'LOCAL PROGRAMMING', '0'},
+      ['1355'] = 	{'LOCAL PROGRAMMING ENDS', '0'},
+      ['1356'] = 	{'KEYSWITCH ZN TAMPER ALERT', '1'},
+      ['1357'] = 	{'EVENT LOG, 80% FULL', '0'},
+      ['1358'] = 	{'TELEPHONE LINE IS RINGING', '0'},
+      ['1359'] = 	{'TELEPHONE LINE SEIZE', '0'},
+      ['1360'] = 	{'TELEPHONE LINE OFF/ON HOOK', '0'},
+      ['1361'] = 	{'TELEPHONE LOCAL ACCESS', '0'},
+      ['1362'] = 	{'TELEPHONE REMOTE ACCESS', '0'},
+      ['1363'] = 	{'REMOTE PROGRAMMING', '0'},
+      ['1364'] = 	{'REMOTE PROGRAMMING ENDS', '0'},
+      ['1365'] = 	{'AC FAIL TBL - POWER SUPV ZN', '1'},
+      ['1366'] = 	{'LOW BATTERY TBL - POWER SUPV ZN', '1'},
+      ['1367'] = 	{'SYSTEM START UP', '3'},
+      ['1368'] = 	{'CONTROL LOW VOLTAGE SHUTDOWN', '0'},
+      ['1369'] = 	{'RF KEYFOB BUTTON 1', '0'},
+      ['1370'] = 	{'RF KEYFOB BUTTON 2', '0'},
+      ['1371'] = 	{'RF KEYFOB BUTTON 3', '0'},
+      ['1372'] = 	{'RF KEYFOB BUTTON 4', '0'},
+      ['1373'] = 	{'RF KEYFOB BUTTON 5', '0'},
+      ['1374'] = 	{'RF KEYFOB BUTTON 6', '0'},
+      ['1375'] = 	{'RF KEYFOB BUTTON 7', '0'},
+      ['1376'] = 	{'RF KEYFOB BUTTON 8', '0'},
+      ['1377'] = 	{'LOST SERIAL PORT EXPANDER TROUBLE', '3'},
+      ['1378'] = 	{'RULE TRIGGERED VOICE TELEPHONE DIAL', '5'},
+      ['1379'] = 	{'DIALER REPORT CLEARED', '2'},
+      ['1380'] = 	{'CENTRAL STATION KISSOFF', '0'},
+      ['1381'] = 	{'TRANSMITTER SUPERVISION LOSS', '1'},
+      ['1382'] = 	{'2-WIRE SMOKE DET. CLEAN TRBL', '1'},
+      ['1383'] = 	{'ETHERNET TROUBLE', '0'},
+      ['1384'] = 	{'ETHERNET RESTORE', '0'},
+      ['1385'] = 	{'RESTORE REMOTE AC POWER', '1'},
+      ['1386'] = 	{'RESTORE REMOTE BATTERY', '1'},
+    }
 
   if (EVENTS[event]) then 
     return EVENTS[event]
@@ -1169,7 +1170,7 @@ function data_logger(data)
           return ""
         end
       end
-  },
+    },
   
   }
   
@@ -1189,7 +1190,7 @@ function data_logger(data)
   end
   
   if (type(Inter_table[response[2]].handlerFunc) ~= "function") then
-    log("processMessage: ERROR: Unknown message type, or message type handled incorrectly.")
+    log("data_logger: ERROR: Unknown message type, or message type handled incorrectly.")
     return false
   end
   
@@ -1435,6 +1436,19 @@ local PANEL_RESPONSES = {
                       return true
                     else
                       processArmingStatusReport(data)
+                      return true
+                    end
+                  end
+  },
+  ["AM"] = {
+    description = "Alarm Memory Update",
+    handlerFunc = function (self, data, misc)
+                    debug("handlerFunc Message type description: ".. self.description)
+                    if (INITIALIZED == false) then
+                      debug(self.description .. ":Plugin not initialized")
+                      return true
+                    else
+                      processAlarmMemoryUpdate(data .. misc)
                       return true
                     end
                   end
@@ -1698,9 +1712,9 @@ local PANEL_RESPONSES = {
   }
 }
 
-function processMessage (data, msgType)
+function processMessage (data, misc, msgType)
   if (not msgType) then -- We called this function from the <incoming> handler, so we check the message.
-    msgType, data = checkMessage(data)
+    msgType, data, misc = checkMessage(data)
     if (not msgType or msgType == "") then
       return false
     end
@@ -1717,12 +1731,12 @@ function processMessage (data, msgType)
     return false
   end
 
-  return response:handlerFunc(data)
+  return response:handlerFunc(data, misc)
 end
 
 local function readResponse (expectedMsgType, functionName, errorMsg)
 
-  local msgType, rx = checkMessage(luup.io.read())
+  local msgType, rx, misc = checkMessage(luup.io.read())
   
   if (not msgType) then
     log(functionName..": ERROR: "..errorMsg)
@@ -1730,7 +1744,7 @@ local function readResponse (expectedMsgType, functionName, errorMsg)
     return false
   end
 
-  local status, data = processMessage(rx, msgType)
+  local status, data = processMessage(rx, misc, msgType)
 
   if (msgType == expectedMsgType) then -- We received the expected message.
     debug("readResponse: Got expected message '"..msgType.."'.")
@@ -1748,14 +1762,14 @@ local function readResponse (expectedMsgType, functionName, errorMsg)
     debug("readResponse: Unexpected response type. Intercept next message.")
     retryCount = retryCount + 1
 
-    msgType, data = checkMessage(luup.io.read())
+    msgType, data, misc = checkMessage(luup.io.read())
     if (not msgType) then
     log(functionName..": ERROR: "..errorMsg)
       g_errorMessage = errorMsg
       return false
     end
 
-    status, data = processMessage(data, msgType)
+    status, data = processMessage(data, misc, msgType)
 
     if (msgType == expectedMsgType) then -- We received the expected message.
       debug("readResponse: Got expected message.")
@@ -1778,7 +1792,7 @@ local function readArmRequestResponse()
   local readCnt = 0
 
   while (readCnt <= MAX_READS) do
-    local msgType, data = checkMessage(luup.io.read())
+    local msgType, data, misc = checkMessage(luup.io.read())
     if (not msgType) then
       return false
     end
@@ -1795,7 +1809,7 @@ local function readArmRequestResponse()
       if (readCnt < MAX_READS) then
         luup.io.intercept()
       end
-      processMessage(data, msgType)
+      processMessage(data, misc, msgType)
     end
   end
 
@@ -1809,14 +1823,14 @@ local function readBypassRequestResponse()
   local readCnt = 0
 
   while (readCnt <= MAX_READS) do
-    local msgType, data = checkMessage(luup.io.read())
+    local msgType, data, misc = checkMessage(luup.io.read())
     if (not msgType) then
       return false
     end
 
     if (msgType == "ZB") then
       debug("readBypassRequestResponse: Got expected message.")
-      return processMessage(data, msgType)
+      return processMessage(data, misc, msgType)
     elseif (msgType == "IC") then
       if(checkValidUserCode(data) == false) then return "IC" end
     else
@@ -1825,7 +1839,7 @@ local function readBypassRequestResponse()
       if (readCnt < MAX_READS) then
         luup.io.intercept()
       end
-      processMessage(data, msgType)
+      processMessage(data, misc, msgType)
     end
   end
 
@@ -3269,10 +3283,10 @@ function incomingGetLog(lul_device, LogStart, lul_job, lul_data)
     end
     debug("incomingJobHandler: processing event " .. incomingLogNumber.." of "..LogEnd .. ".")
     if(incomingLogNumber < LogEnd) then
-      return 5, 10, processMessage (lul_data, msgType, lul_job, lul_device)
+      return 5, 10, processMessage (lul_data, misc, msgType)
     elseif(incomingLogNumber >= LogEnd) then
       debug("incomingJobHandler: getting last event, job finished.")
-      return 4, nil, processMessage (lul_data, msgType, lul_job, lul_device)
+      return 4, nil, processMessage (lul_data, misc, msgType)
     end
 
   end
