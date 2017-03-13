@@ -1,5 +1,5 @@
 -- Plugin Version
-local VERSION = "2.430"
+local VERSION = "2.432"
 
 -- Flags
 local DEBUG_MODE = true
@@ -401,7 +401,7 @@ function commandRetry(func)
   while retry <= 3 do
     if (retry > 1) then
       debug(string.format("commandRetry: command sent %i times",retry))
-      luup.sleep(400*(retry*2))
+      luup.sleep(600*(retry*2))
     end
     local status, data = func()
     if (status) then
@@ -594,7 +594,7 @@ end
 local function processZoneStatusReport (data)
   for i in pairs(g_zones) do
     local status = data:sub(i, i)
-    debug("processZoneStatusReport: Zone ".. i .." status = ".. ZONE_STATUSES[c] ..".")
+    debug("processZoneStatusReport: Zone ".. i .." status = ".. ZONE_STATUSES[status] ..".")
     if (ZONE_STATUSES[status] == "Normal") then
       setZoneState(i, "Armed", "1")
       setZoneState(i, "Tripped", "0")
@@ -1850,7 +1850,7 @@ end
 
 local function sendCommand (command, data)
   data = data or ""
-
+  luup.sleep(100)
   local length = 2 + #data + 2 + 2 -- command length + data length + 00 length + checksum length
   local checksum = calculateChecksum( string.format("%0.2X%s%s00", length, command, data) )
   local cmd = string.format("%0.2X%s%s00%0.2X", length, command, data, checksum)
@@ -3259,7 +3259,7 @@ function getEventJob(lul_device, LogStart, lul_job )
   g_logFile = {}
 
   for i=LogStart,LogEnd do
-    luup.sleep(150)
+    luup.sleep(100)
     debug("systemLog: getting log event " .. i .. ".")
     if (sendCommand ("ld", padLeft(i,3)) ~= false) then
     else
