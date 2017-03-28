@@ -3019,7 +3019,7 @@ local function addLuupDevice()
   for dev, attr in pairs(luup.devices) do
     if (attr.device_num_parent == elk_device) then
 
-      local zoneNo = attr.id:match("^elk_zone_(%d+)") or attr.id:match("^elk_temp_(%d+)" or attr.id:match("^elk_leak_(%d+)" )
+      local zoneNo = attr.id:match("^elk_zone_(%d+)") or attr.id:match("^elk_temp_(%d+)") or attr.id:match("^elk_leak_(%d+)")
       local partitionNo = attr.id:match("^elk_partition_(%d+)")
       local outputNo = attr.id:match("^elk_output_(%d+)")
       local taskNo = attr.id:match("^elk_task_(%d+)")
