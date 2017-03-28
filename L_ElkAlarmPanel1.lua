@@ -3429,8 +3429,8 @@ function elkStartup (lul_device)
   if (version) then
     log(":M1 version " .. (version or "N/A"))
     luup.variable_set(ELK_SID, "FirmwareVersion", version, lul_device)
-  else
-    return false, "No version returned", "Elk Alarm Panel"
+  --else
+    --return false, "No version returned", "Elk Alarm Panel"
   end
 
   getOutputs()
