@@ -1,5 +1,5 @@
 -- Plugin Version
-local VERSION = "2.432"
+local VERSION = "2.433"
 
 -- Flags
 local DEBUG_MODE = true
@@ -1736,7 +1736,7 @@ end
 
 local function readResponse (expectedMsgType, functionName, errorMsg)
 
-  local msgType, rx, misc = checkMessage(luup.io.read())
+  local msgType, data, misc = checkMessage(luup.io.read())
   
   if (not msgType) then
     log(functionName..": ERROR: "..errorMsg)
@@ -1744,7 +1744,7 @@ local function readResponse (expectedMsgType, functionName, errorMsg)
     return false
   end
 
-  local status, data = processMessage(rx, misc, msgType)
+  local status, rx = processMessage(data, misc, msgType)
 
   if (msgType == expectedMsgType) then -- We received the expected message.
     debug("readResponse: Got expected message '"..msgType.."'.")
@@ -1752,7 +1752,7 @@ local function readResponse (expectedMsgType, functionName, errorMsg)
     log(functionName..": ERROR: "..errorMsg)
       g_errorMessage = errorMsg
     end
-    return status, data
+    return status, rx
   end
 
   -- We received other message. Process it and read the next message.
@@ -1769,7 +1769,7 @@ local function readResponse (expectedMsgType, functionName, errorMsg)
       return false
     end
 
-    status, data = processMessage(data, misc, msgType)
+    local status, data = processMessage(data, misc, msgType)
 
     if (msgType == expectedMsgType) then -- We received the expected message.
       debug("readResponse: Got expected message.")
@@ -3429,8 +3429,8 @@ function elkStartup (lul_device)
   if (version) then
     log(":M1 version " .. (version or "N/A"))
     luup.variable_set(ELK_SID, "FirmwareVersion", version, lul_device)
-  --else
-    --return false, "No version returned", "Elk Alarm Panel"
+  else
+    return false, "No version returned", "Elk Alarm Panel"
   end
 
   getOutputs()
