@@ -1,5 +1,5 @@
 -- Plugin Version
-local VERSION = "2.433"
+local VERSION = "2.434"
 
 -- Flags
 local DEBUG_MODE = true
@@ -59,12 +59,12 @@ local g_pinCodes    = {}
 
 local ZONE_DEVICE = {
   ['0'] = {},
-  ['1'] = {type = "urn:schemas-micasaverde-com:device:DoorSensor:1", file = "D_DoorSensor1.xml", id = "elk_zone_"},
-  ['2'] = {type = "urn:schemas-micasaverde-com:device:MotionSensor:1", file = "D_MotionSensor1.xml", id = "elk_zone_"},
-  ['3'] = {type = "urn:schemas-micasaverde-com:device:SmokeSensor:1", file = "D_SmokeSensor1.xml", id = "elk_zone_"},
-  ['4'] = {type = "urn:schemas-micasaverde-com:device:TemperatureSensor:1", file = "D_TemperatureSensor1.xml", id = "elk_temp_"},
-  ['5'] = {type = "urn:schemas-micasaverde-com:device:TempLeakSensor:1", file = "D_TempLeakSensor1.xml", id = "elk_leak_"},
-  ['6'] = {type = "urn:schemas-micasaverde-com:device:Scene:1", file = "D_Scene1.xml", id = "elk_fob_"}
+  ['1'] = {devType = "urn:schemas-micasaverde-com:device:DoorSensor:1", file = "D_DoorSensor1.xml", id = "elk_zone_"},
+  ['2'] = {devType = "urn:schemas-micasaverde-com:device:MotionSensor:1", file = "D_MotionSensor1.xml", id = "elk_zone_"},
+  ['3'] = {devType = "urn:schemas-micasaverde-com:device:SmokeSensor:1", file = "D_SmokeSensor1.xml", id = "elk_zone_"},
+  ['4'] = {devType = "urn:schemas-micasaverde-com:device:TemperatureSensor:1", file = "D_TemperatureSensor1.xml", id = "elk_temp_"},
+  ['5'] = {devType = "urn:schemas-micasaverde-com:device:TempLeakSensor:1", file = "D_TempLeakSensor1.xml", id = "elk_leak_"},
+  ['6'] = {devType = "urn:schemas-micasaverde-com:device:Scene:1", file = "D_Scene1.xml", id = "elk_fob_"}
 }
 -------------------------------------------------------------------------------
 -- Panel Related Constants
@@ -2951,9 +2951,9 @@ end
 
 local function appendZones (rootPtr)
   for k, v in pairs(g_zones) do
-    debug("appendZones: Appending zone "..k..".")
     local device = get_device_type(k)
-    luup.chdev.append(elk_device, rootPtr, device.id..k, "Zone "..k..": "..(v.label or ""), device.type, device.file, nil, nil, false)
+    debug("appendZones: Appending zone ".. k .. " Device type:" .. device.devType .. " File:" .. device.file .. ".")
+    luup.chdev.append(elk_device, rootPtr, device.id..k, "Zone "..k..": "..(v.label or ""), device.devType, device.file, nil, nil, false)
   end
 end
 
@@ -3019,7 +3019,7 @@ local function addLuupDevice()
   for dev, attr in pairs(luup.devices) do
     if (attr.device_num_parent == elk_device) then
 
-      local zoneNo = attr.id:match("^elk_zone_(%d+)") or attr.id:match("^elk_temp_(%d+)")
+      local zoneNo = attr.id:match("^elk_zone_(%d+)") or attr.id:match("^elk_temp_(%d+)" or attr.id:match("^elk_leak_(%d+)" )
       local partitionNo = attr.id:match("^elk_partition_(%d+)")
       local outputNo = attr.id:match("^elk_output_(%d+)")
       local taskNo = attr.id:match("^elk_task_(%d+)")
