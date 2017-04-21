@@ -401,7 +401,7 @@ function commandRetry(func)
   while retry <= 3 do
     if (retry > 1) then
       debug(string.format("commandRetry: command sent %i times",retry))
-      luup.sleep(600*(retry*2))
+      luup.sleep(300*(retry*2))
     end
     local status, data = func()
     if (status) then
@@ -1207,16 +1207,11 @@ local function processElkLog (data)
   local index = tonumber(data:sub(17,19))
   local day = DAYS[tonumber(data:sub(20,20))] .. " " .. data:sub(15,16) .. " " .. 
     MONTHS[tonumber(data:sub(13,14))] .. " " .. tonumber(data:sub(21,22))
-  table.insert(g_logFile,"{" ..
-    "\"index\": \"" .. index .. "\"," ..
-    "\"eventType\": \"" .. event_string .. "\"," ..
-    "\"time\": \"" .. time .. "\"," ..
-    "\"day\": \"" .. day .. "\"" ..
-    "}")
+    table.insert(g_logFile,"{".."\"index\":\""..index .."\",".."\"eventType\":\""..
+    event_string.."\",".."\"time\":\""..time.."\",".."\"day\":\""..day.."\"".."}")
   debug("processElkLog: processing log index ".. data:sub(17,19) .. ".")
   return true
 end
-
 
 
 function processRTC(data)
@@ -1850,7 +1845,7 @@ end
 
 local function sendCommand (command, data)
   data = data or ""
-  luup.sleep(100)
+  --luup.sleep(100)
   local length = 2 + #data + 2 + 2 -- command length + data length + 00 length + checksum length
   local checksum = calculateChecksum( string.format("%0.2X%s%s00", length, command, data) )
   local cmd = string.format("%0.2X%s%s00%0.2X", length, command, data, checksum)
@@ -3259,7 +3254,7 @@ function getEventJob(lul_device, LogStart, lul_job )
   g_logFile = {}
 
   for i=LogStart,LogEnd do
-    luup.sleep(100)
+    --luup.sleep(100)
     debug("systemLog: getting log event " .. i .. ".")
     if (sendCommand ("ld", padLeft(i,3)) ~= false) then
     else
@@ -3316,7 +3311,8 @@ function callbackHandler(lul_request, lul_parameters, lul_outputformat)
   local functionName = "callbackHandler"
 
   if (lul_request == "ElkEvent" and lul_outputformat == "json") then
-    return "[" .. table.concat(g_logFile,",") .. "]"
+    --return "[" .. table.concat(g_logFile,",") .. "]"
+    return "{\"log\": [" ..table.concat(g_logFile,",") .. "]}"
   elseif (lul_request == "ElkRTC" and lul_outputformat == "json") then
     local errorMessage = "Failed to request real time clock."
     local status = sendIntercepted("rr", functionName, errorMessage)

@@ -232,8 +232,7 @@ var Elk = (function(api)
       onSuccess: function(response)
       {
         status.html("Response received");
-        var Log = response.responseText.evalJSON();
-
+        var Log = response.responseText.evalJSON()["log"];
         for (var i = 0; i < Log.length; i++)
         {
           html = '';
