@@ -1,5 +1,5 @@
 -- Plugin Version
-local VERSION = "2.434"
+local VERSION = "2.435"
 
 -- Flags
 local DEBUG_MODE = true
@@ -2812,7 +2812,7 @@ local function createKeypads()
   local errorMessage = "Failed to create keypad"
 
   local i = 1
-  while (i >=1 and i <=8) do
+  while (i >=1 and i <=16) do
     local status = sendIntercepted("sd", functionName, errorMessage, string.format("03%03d", i))
     if (status) then
       status, data = readResponse("SD", functionName, errorMessage .. " " .. i)
