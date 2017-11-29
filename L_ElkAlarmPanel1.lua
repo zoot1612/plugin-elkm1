@@ -1,5 +1,5 @@
 -- Plugin Version
-local VERSION = "2.435"
+local VERSION = "2.436"
 
 -- Flags
 local DEBUG_MODE = true
@@ -2830,7 +2830,7 @@ local function createKeypads()
         g_keypads[keypad] = {}
         local label = (data:sub(6) or "")
         debug(string.format("createKeypads: Adding name %s to keypad %03i.", label, keypad))
-        g_keypads[i].label = label
+        g_keypads[keypad].label = label
         i = keypad
       end
     end
